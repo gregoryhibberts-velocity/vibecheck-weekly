@@ -1,6 +1,6 @@
 import json, urllib.request, urllib.parse
 def request(method, url, data=None, headers=None, form=False, timeout=20):
-    h = dict(headers or {})
+    h = {"User-Agent": "VibeCheckWeekly/1.0", **(headers or {})}
     body = None
     if data is not None:
         if form: body = urllib.parse.urlencode(data, doseq=True).encode(); h.setdefault("Content-Type", "application/x-www-form-urlencoded")
