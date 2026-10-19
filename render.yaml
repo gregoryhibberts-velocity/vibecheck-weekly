@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: vibecheck-weekly
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    healthCheckPath: /api/health
+    domains: [vibecheck.itsvelocitygroup.com]
+    envVars:
+      - {key: PYTHON_VERSION, value: 3.12.7}
+      - {key: APP_NAME, value: VibeCheck Weekly}
+      - {key: BASE_URL, value: https://vibecheck.itsvelocitygroup.com}
+      - {key: DATABASE_URL, sync: false}
+      - {key: CRON_SECRET, sync: false}
+      - {key: STRIPE_SECRET_KEY, sync: false}
+      - {key: STRIPE_WEBHOOK_SECRET, sync: false}
+      - {key: STRIPE_PRICE_SOLO, sync: false}
+      - {key: STRIPE_PRICE_PRO, sync: false}
+      - {key: STRIPE_PRICE_UNLOCK, sync: false}
+      - {key: EMAIL_API_KEY, sync: false}
+      - {key: EMAIL_PROVIDER, value: resend}
+      - {key: EMAIL_FROM, value: VibeCheck Weekly <reports@vibecheck.itsvelocitygroup.com>}
+      - {key: ACTIVECAMPAIGN_API_URL, sync: false}
+      - {key: ACTIVECAMPAIGN_API_KEY, sync: false}
+      - {key: ACTIVECAMPAIGN_LIST_ID, sync: false}
