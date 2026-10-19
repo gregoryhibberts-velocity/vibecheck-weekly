@@ -103,8 +103,10 @@ class handler(BaseHTTPRequestHandler):
             return self._json(200, {"ran": weekly_run()})
         if path == "/api/cron/nudges":
             if not config.CRON_SECRET or self.headers.get("Authorization") != f"Bearer {config.CRON_SECRET}": return self._json(401, {"error": "unauthorized"})
-            t = urllib.parse.parse_qs(p.query).get("test", [""])[0]
-            return self._json(200, {"test": nudges.send_tests(t)} if t else nudges.run())
+            qs = urllib.parse.parse_qs(p.query); t = qs.get("test", [""])[0]
+            if t: return self._json(200, {"test": nudges.send_tests(t)})
+            if qs.get("only", [""])[0] == "audience": return self._json(200, {"audience_added": nudges.sync_audience()})
+            return self._json(200, nudges.run())
         if path == "/unsubscribe":
             qs = urllib.parse.parse_qs(p.query); e = qs.get("e", [""])[0].lower(); t = qs.get("t", [""])[0]
             if not nudges.check_unsub(e, t): return self._send(400, views.message("Link not valid", "This unsubscribe link is not valid."))
