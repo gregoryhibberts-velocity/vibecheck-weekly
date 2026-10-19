@@ -34,7 +34,7 @@ s, _, body = req("GET", "/api/cron/weekly", headers={"Authorization": "Bearer " 
 codes = [req("POST", f"/site/{key}/scan")[0] for _ in range(6)]; check("rate limit kicks in (per email 5/day)", 429 in codes, codes)
 calls = [json.loads(l) for l in open(os.path.join(os.path.dirname(__file__), "mock_calls.jsonl"))]
 paths = [c["path"] for c in calls]
-check("ActiveCampaign contact sync + list add", "/ac/api/3/contact/sync" in paths and "/ac/api/3/contactLists" in paths)
+check("Resend audience contact added", any(x.startswith("/audiences/aud_mock/contacts") for x in paths))
 check("Stripe checkout session created with auth", any(c["path"] == "/v1/checkout/sessions" and c["auth_present"] for c in calls))
 check("transactional emails sent", paths.count("/emails") >= 3, paths.count("/emails"))
 print(f"\n{sum(ok for _, ok in results)}/{len(results)} checks passed")

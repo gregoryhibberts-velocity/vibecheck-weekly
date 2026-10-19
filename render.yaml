@@ -21,6 +21,4 @@ services:
       - {key: EMAIL_API_KEY, sync: false}
       - {key: EMAIL_PROVIDER, value: resend}
       - {key: EMAIL_FROM, value: VibeCheck Weekly <reports@vibecheck.itsvelocitygroup.com>}
-      - {key: ACTIVECAMPAIGN_API_URL, sync: false}
-      - {key: ACTIVECAMPAIGN_API_KEY, sync: false}
-      - {key: ACTIVECAMPAIGN_LIST_ID, sync: false}
+      - {key: RESEND_AUDIENCE_ID, sync: false}

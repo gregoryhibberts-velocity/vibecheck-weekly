@@ -1,9 +1,9 @@
 #!/bin/bash
-# Local end-to-end run against real Postgres + mocked Stripe/ActiveCampaign/Resend.
+# Local end-to-end run against real Postgres + mocked Stripe/Resend.
 cd "$(dirname "$0")/.."
 export DATABASE_URL="postgresql://vc@/vibecheck?host=/tmp/pg&port=55432" ALLOW_PRIVATE_TARGETS=1 BASE_URL=http://localhost:3000 PORT=3000 STRIPE_PRICE_UNLOCK=price_unlock \
   CRON_SECRET=test-cron-secret STRIPE_SECRET_KEY=sk_test_mock STRIPE_WEBHOOK_SECRET=whsec_test STRIPE_PRICE_SOLO=price_solo STRIPE_PRICE_PRO=price_pro \
-  STRIPE_API_BASE=http://127.0.0.1:4010 ACTIVECAMPAIGN_API_URL=http://127.0.0.1:4010/ac ACTIVECAMPAIGN_API_KEY=ac_mock ACTIVECAMPAIGN_LIST_ID=3 \
+  STRIPE_API_BASE=http://127.0.0.1:4010 RESEND_AUDIENCE_ID=aud_mock \
   EMAIL_PROVIDER=resend EMAIL_API_KEY=re_mock EMAIL_API_BASE=http://127.0.0.1:4010 EMAIL_FROM="AppCheck <test@localhost>"
 psql -h /tmp/pg -p 55432 -U vc -d postgres -qc "DROP DATABASE IF EXISTS vibecheck" -c "CREATE DATABASE vibecheck"
 rm -f tests/mock_calls.jsonl

@@ -2,7 +2,7 @@
 import json, os, re, secrets, sys, urllib.parse
 from http.server import BaseHTTPRequestHandler
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from lib import config, db, scanner, verify, ratelimit, crm, mailer, billing, views
+from lib import config, db, scanner, verify, ratelimit, crm, mailer, billing, views, nudges
 
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$")
 
@@ -101,6 +101,15 @@ class handler(BaseHTTPRequestHandler):
         if path == "/api/cron/weekly":
             if not config.CRON_SECRET or self.headers.get("Authorization") != f"Bearer {config.CRON_SECRET}": return self._json(401, {"error": "unauthorized"})
             return self._json(200, {"ran": weekly_run()})
+        if path == "/api/cron/nudges":
+            if not config.CRON_SECRET or self.headers.get("Authorization") != f"Bearer {config.CRON_SECRET}": return self._json(401, {"error": "unauthorized"})
+            t = urllib.parse.parse_qs(p.query).get("test", [""])[0]
+            return self._json(200, {"test": nudges.send_tests(t)} if t else nudges.run())
+        if path == "/unsubscribe":
+            qs = urllib.parse.parse_qs(p.query); e = qs.get("e", [""])[0].lower(); t = qs.get("t", [""])[0]
+            if not nudges.check_unsub(e, t): return self._send(400, views.message("Link not valid", "This unsubscribe link is not valid."))
+            nudges.do_unsubscribe(e)
+            return self._send(200, views.message("Unsubscribed", "You will no longer receive follow-up emails from VibeCheck Weekly."))
         m = re.fullmatch(r"/site/([\w-]+)", path)
         if m:
             s = self._site(m.group(1))
@@ -125,6 +134,10 @@ class handler(BaseHTTPRequestHandler):
             raw = self._body()
             if not billing.verify_signature(raw, self.headers.get("Stripe-Signature", "")): return self._json(400, {"error": "bad signature"})
             return self._json(200, {"result": billing.handle_event(json.loads(raw))})
+        if path == "/unsubscribe":
+            qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query); e = qs.get("e", [""])[0].lower(); t = qs.get("t", [""])[0]
+            if not nudges.check_unsub(e, t): return self._json(400, {"error": "invalid"})
+            nudges.do_unsubscribe(e); return self._json(200, {"ok": True})
         if path == "/start": return self._start()
         if path == "/scan": return self._free_scan()
         m = re.fullmatch(r"/r/([\w-]+)/(email|unlock|monitor)", path)
@@ -182,7 +195,7 @@ class handler(BaseHTTPRequestHandler):
             if not ratelimit.hit("start-email:" + email, 20, 86400): return self._send(429, views.message("Slow down", "Too many requests. Try later."))
             acc, new = upsert_account(email)
             db.q("UPDATE scans SET email=?, unlocked=CASE WHEN ?='free' THEN unlocked ELSE 1 END WHERE token=?", (email, acc["plan"], tok))
-            if new: crm.add_signup(email)
+            if new and crm.add_signup(email): nudges._mark(email, 'audience')
             email_report(None, db.one("SELECT * FROM scans WHERE token=?", (tok,)))
             return self._redirect(f"/r/{tok}")
         if not sc["email"]: return self._redirect(f"/r/{tok}")
@@ -213,7 +226,7 @@ class handler(BaseHTTPRequestHandler):
             db.insert("INSERT INTO sites(account_id, url, host, verify_token, manage_key, created_at) VALUES(?,?,?,?,?,?)",
                       (acc["id"], clean, host, new_verify_token(clean), secrets.token_urlsafe(18), db.now()))
             s = db.one("SELECT * FROM sites WHERE account_id=? AND host=?", (acc["id"], host))
-        if new: crm.add_signup(email)
+        if new and crm.add_signup(email): nudges._mark(email, 'audience')
         mailer.send(email, f"Verify {host} for your {config.APP_NAME} check",
                     f"<p>Your private link for {host}: <a href='{config.BASE_URL}/site/{s['manage_key']}'>{config.BASE_URL}/site/{s['manage_key']}</a></p>")
         return self._redirect(f"/site/{s['manage_key']}")

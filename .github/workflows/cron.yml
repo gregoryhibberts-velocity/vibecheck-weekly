@@ -3,6 +3,7 @@ on:
   schedule:
     - cron: "*/10 * * * *"
     - cron: "0 14 * * 1"
+    - cron: "0 15 * * *"
   workflow_dispatch:
     inputs:
       weekly:
@@ -25,3 +26,9 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           curl -fsS --retry 3 --retry-delay 30 --retry-all-errors --max-time 300 -H "Authorization: Bearer $CRON_SECRET" "$BASE/api/cron/weekly"
+      - name: Daily follow-up emails
+        if: github.event.schedule == '0 15 * * *'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -fsS --retry 3 --retry-delay 30 --retry-all-errors --max-time 300 -H "Authorization: Bearer $CRON_SECRET" "$BASE/api/cron/nudges"
