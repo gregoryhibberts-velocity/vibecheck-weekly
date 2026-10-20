@@ -1,18 +1,18 @@
 import html, json, time
 from . import config
 E = html.escape
-CSS = """body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0;background:#0b1020;color:#e8ecf5}
-a{color:#7cc4ff}.wrap{max-width:860px;margin:0 auto;padding:40px 24px}h1{font-size:40px;margin:.2em 0}
-.sub{color:#aab3c8;font-size:19px;line-height:1.5}.card{background:#141b31;border:1px solid #243052;border-radius:14px;padding:24px;margin:22px 0}
-input[type=url],input[type=email]{width:100%;box-sizing:border-box;padding:13px;margin:6px 0 14px;border-radius:8px;border:1px solid #33416b;background:#0b1020;color:#fff;font-size:16px}
-button{background:#3b82f6;color:#fff;border:0;border-radius:8px;padding:13px 20px;font-size:16px;cursor:pointer}button.alt{background:#7c3aed}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.grid div{background:#141b31;border:1px solid #243052;border-radius:12px;padding:16px;color:#c7cfe0}.grid div div{background:none;border:0;padding:0;border-radius:0}
-.f{border-left:5px solid #555;padding:12px 16px;margin:10px 0;background:#141b31;border-radius:8px}
-.critical{border-color:#ef4444}.warning{border-color:#f59e0b}.info{border-color:#60a5fa}.pass{border-color:#22c55e}.fix{border-color:#a78bfa}
+CSS = """body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0;background:#f6f8fc linear-gradient(180deg,#eef3ff 0%,#f8fafd 420px,#ffffff 100%) no-repeat;color:#1f2937}
+a{color:#1d4ed8}.wrap{max-width:860px;margin:0 auto;padding:40px 24px}h1{font-size:40px;margin:.2em 0}
+.sub{color:#4b5563;font-size:19px;line-height:1.5}.card{background:#fff;border:1px solid #e3e8f0;box-shadow:0 1px 3px rgba(16,24,40,.04);border-radius:14px;padding:24px;margin:22px 0}
+input[type=url],input[type=email]{width:100%;box-sizing:border-box;padding:13px;margin:6px 0 14px;border-radius:8px;border:1px solid #cfd6e3;background:#fff;color:#1f2937;font-size:16px}
+button{background:#2563eb;color:#fff;border:0;border-radius:8px;padding:13px 20px;font-size:16px;cursor:pointer}button.alt{background:#6d28d9}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.grid div{background:#fff;border:1px solid #e3e8f0;border-radius:12px;padding:16px;color:#374151}.grid div div{background:none;border:0;padding:0;border-radius:0}
+.f{border:1px solid #e3e8f0;border-left:5px solid #9ca3af;padding:12px 16px;margin:10px 0;background:#fff;border-radius:8px}
+.critical{border-left-color:#dc2626}.warning{border-left-color:#d97706}.info{border-left-color:#3b82f6}.pass{border-left-color:#16a34a}.fix{border-left-color:#7c3aed}
 .tag{font-size:12px;text-transform:uppercase;font-weight:700;letter-spacing:.05em;margin-right:8px}
-.prompt,.code{background:#0b1020;border:1px dashed #3b4a78;padding:10px;border-radius:6px;margin-top:8px;font-size:14px;color:#d6dcf0;word-break:break-all}
-.score{font-size:60px;font-weight:800}small{color:#8a93aa}.price{font-size:36px;font-weight:800}.ok{color:#22c55e}.bad{color:#f87171}
-.hero h1{font-size:46px;line-height:1.1}.eyebrow{color:#7cc4ff;font-weight:700;letter-spacing:.08em}.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.cta input[type=url],.cta2 input[type=url]{flex:1;min-width:300px;margin:0}.own{display:block;width:100%;color:#c7cfe0;margin:4px 0 14px}.works{color:#aab3c8}.faq details{background:#141b31;border:1px solid #243052;border-radius:10px;padding:14px 16px;margin:8px 0}.faq summary{cursor:pointer;font-weight:600}.sample{opacity:.97}.blur{filter:blur(5px);user-select:none}.lock{background:#1e2745;border:1px solid #3b4a78;border-radius:12px;padding:20px;margin:18px 0}h2{margin-top:36px}nav{display:flex;gap:18px;margin-bottom:10px}nav a{color:#aab3c8;text-decoration:none}footer{margin-top:44px;padding-top:16px;border-top:1px solid #243052;color:#8a93aa}.busy{display:none;margin:10px 0 0;color:#c7cfe0}form.sending .busy{display:block;width:100%}
+.prompt,.code{background:#f8fafc;border:1px dashed #c3cddd;padding:10px;border-radius:6px;margin-top:8px;font-size:14px;color:#1f2937;word-break:break-all}
+.score{font-size:60px;font-weight:800}small{color:#5b6474}.price{font-size:36px;font-weight:800}.ok{color:#15803d}.bad{color:#b91c1c}
+.hero h1{font-size:46px;line-height:1.1}.eyebrow{display:inline-block;background:#fef3c7;color:#78350f;border:1px solid #fcd34d;border-radius:999px;padding:3px 10px;font-weight:700;letter-spacing:.08em}.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.cta input[type=url],.cta2 input[type=url]{flex:1;min-width:300px;margin:0}.own{display:block;width:100%;color:#374151;margin:4px 0 14px}.works{color:#4b5563}.faq details{background:#fff;border:1px solid #e3e8f0;border-radius:10px;padding:14px 16px;margin:8px 0}.faq summary{cursor:pointer;font-weight:600}.sample{opacity:.97}.blur{filter:blur(5px);user-select:none}.lock{background:#f5f8ff;border:1px solid #d6e0f5;border-radius:12px;padding:20px;margin:18px 0}h2{margin-top:36px}nav{display:flex;gap:18px;margin-bottom:10px}nav a{color:#374151;text-decoration:none}footer{margin-top:44px;padding-top:16px;border-top:1px solid #e3e8f0;color:#5b6474}.busy{display:none;margin:10px 0 0;color:#374151}form.sending .busy{display:block;width:100%}
 *{box-sizing:border-box}img,pre,table{max-width:100%}.wrap,.card,.grid div,.f,.lock{overflow-wrap:anywhere;min-width:0}
 @media (max-width:640px){.wrap{padding:24px 16px}.grid{grid-template-columns:1fr !important}h1,.hero h1{font-size:32px}.score{font-size:48px}.cta input[type=url],.cta2 input[type=url]{min-width:0;width:100%;flex-basis:100%}.card{padding:18px}form[style*=inline]{display:block !important;margin:10px 0 0 !important}button{max-width:100%;white-space:normal}}"""
 SCAN_JS = '<script>document.querySelectorAll(\'form[action="/scan"]\').forEach(function(f){var m=document.createElement(\'p\');m.className=\'busy\';m.setAttribute(\'role\',\'status\');m.textContent=\'Checking your app... this takes up to 30 seconds. Please keep this page open.\';f.appendChild(m);f.addEventListener(\'submit\',function(){f.classList.add(\'sending\');var b=f.querySelector(\'button\');if(b){b.disabled=true;b.textContent=\'Checking your app...\';}});});</script>'
@@ -50,7 +50,7 @@ def landing():
 <div class=grid><div><b>Free check</b><div class=price>$0</div>Score and list of problems.</div>
 <div><b>Full report</b><div class=price>$9</div>One-time. Every detail plus fix prompts.</div>
 <div><b>Weekly monitoring</b><div class=price>$19<small>/mo</small></div>Re-checked every week, alerts on new issues. $49/mo for up to 5 apps.</div></div>
-<p style='text-align:center'><small style='color:#888'>+ sales tax where applicable</small></p>
+<p style='text-align:center'><small style='color:#5b6474'>+ sales tax where applicable</small></p>
 <h2>FAQ</h2>
 <div class=faq><details><summary>Is the scan safe for my app?</summary>Yes. It's read-only and passive: we load your public pages and scripts like a normal visitor. No logins, no attacks, no writes, no database probing.</details>
 <details><summary>Do you need access to my code or Supabase?</summary>No. The check only uses what your site already serves publicly. Weekly monitoring asks you to add a small verification tag so only the owner can set it up.</details>
@@ -64,10 +64,10 @@ def pricing():
     p = config.PLANS
     return page("Pricing", f"""<h1>Pricing</h1><p class=sub>Your first check is free. Weekly monitoring re-checks your app every week and emails you only what changed.</p>
 <div class=grid style='grid-template-columns:1fr 1fr 1fr'>
-<div><b>Free</b><div class=price>$0</div>One full scan of your app, with the issue list.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#3b82f6;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start a free check</a></div>
-<div><b>{p['solo']['name']}</b><div class=price>${p['solo']['price']}<small>/mo</small></div>Weekly monitoring for 1 app, alerts on new issues, fix prompts.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#3b82f6;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start free, then get Solo</a></div>
-<div><b>{p['pro']['name']}</b><div class=price>${p['pro']['price']}<small>/mo</small></div>Weekly monitoring for up to 5 apps.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#3b82f6;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start free, then get Pro</a></div></div>
-<p style='text-align:center'><small style='color:#888'>+ sales tax where applicable</small></p>
+<div><b>Free</b><div class=price>$0</div>One full scan of your app, with the issue list.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#2563eb;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start a free check</a></div>
+<div><b>{p['solo']['name']}</b><div class=price>${p['solo']['price']}<small>/mo</small></div>Weekly monitoring for 1 app, alerts on new issues, fix prompts.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#2563eb;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start free, then get Solo</a></div>
+<div><b>{p['pro']['name']}</b><div class=price>${p['pro']['price']}<small>/mo</small></div>Weekly monitoring for up to 5 apps.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#2563eb;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start free, then get Pro</a></div></div>
+<p style='text-align:center'><small style='color:#5b6474'>+ sales tax where applicable</small></p>
 <p><small>Plans start from a free check of your app: scan it, confirm you own it, then choose Solo or Pro on your site page.</small></p>""")
 def message(title, text, code=None):
     return page(title, f"<h1>{E(title)}</h1><p class=sub>{text}</p><a href=/>Back to start</a>")
@@ -91,7 +91,7 @@ def site_page(site, account, scans, ins, verify_error=None, weekly_count=0):
             else:
                 out.append(f"""<div class=card><b>Keep it safe every week.</b><p>We re-check every week and email you when something new breaks.</p>
 <form method=post action=/site/{k}/checkout style='display:inline'><input type=hidden name=plan value=solo><button class=alt>Monitor 1 app – $19/mo</button></form>
-<form method=post action=/site/{k}/checkout style='display:inline;margin-left:10px'><input type=hidden name=plan value=pro><button class=alt>Monitor up to 5 apps – $49/mo</button></form><p><small style='color:#888'>+ sales tax where applicable</small></p></div>""")
+<form method=post action=/site/{k}/checkout style='display:inline;margin-left:10px'><input type=hidden name=plan value=pro><button class=alt>Monitor up to 5 apps – $49/mo</button></form><p><small style='color:#5b6474'>+ sales tax where applicable</small></p></div>""")
     if scans:
         out.append("<h2>Reports</h2>" + "".join(f"<div class=f><a href=/r/{s['token']}>{time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime(s['created_at']))}</a> &nbsp; score <b>{s['score']}</b>/100</div>" for s in scans))
     out.append("<p><small>Bookmark this page: it is your private link for this site.</small></p>")
