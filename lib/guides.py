@@ -65,6 +65,29 @@ GUIDES = {
 <p>Open Graph tags (og:title, og:description, og:image) control how your link looks when shared. They don't directly affect ranking, but a clear preview helps people click, and shared links help a new site get found.</p>
 <h2>7. The site is too new or has no links</h2>
 <p>Even a well-built site takes time to be crawled. Register it in Google Search Console, submit the sitemap and request indexing for the home page.</p>"""),
+"api-key-exposed-in-frontend": dict(
+ title="Is my API key exposed in my AI-built app? How to check and fix it",
+ desc="How to tell if an OpenAI, Stripe or Supabase service_role key is visible in the frontend of an app built with Lovable, Bolt, Replit, v0 or Cursor, and what to do if it is.",
+ body=CTA + """<p class=sub>AI app builders often wire up an API by pasting the key right into the code. If that code runs in the browser, anyone who visits your site can find the key and use it on your bill. Here is how to check in a few minutes and how to fix it.</p>
+<h2>1. Know which keys can be public</h2>
+<p>Some keys are made to be seen. The Supabase project URL and <b>anon</b> key, a Stripe <b>publishable</b> key (pk_live_) and a Firebase web config are all fine in the browser. Your database rules and server settings decide what they can do.</p>
+<p>Other keys must stay secret. These include the Supabase <b>service_role</b> key, Stripe secret keys (sk_live_), and keys for OpenAI (sk-), Anthropic (sk-ant-), Resend, SendGrid and similar services. If one of these reaches the browser, treat it as leaked.</p>
+<h2>2. Search your live site</h2>
+<p>Open your live app, not the editor preview. Open the browser developer tools, go to the Sources or Network tab, and search all loaded files for <code>service_role</code>, <code>sk_live_</code>, <code>sk-</code> and <code>Bearer</code>. Also check the Network tab while you use the app. If a request goes straight from the browser to api.openai.com or api.stripe.com with a secret key in the header, the key is exposed.</p>
+<h2>3. Check environment variable names</h2>
+<p>Tools like Vite and Next.js copy some environment variables into the browser code on purpose. Any variable that starts with <code>VITE_</code>, <code>NEXT_PUBLIC_</code> or <code>REACT_APP_</code> ends up public. A secret key stored under one of these names is not hidden, even though it lives in a .env file.</p>
+<h2>4. Check your code history</h2>
+<p>If your project is on GitHub and the repo is public, a key committed once is still in the history after you delete it. Search the repo, and assume any key that was ever committed is leaked.</p>
+<h2>5. If you find a secret key, fix it in this order</h2>
+<ol>
+<li><b>Rotate the key first.</b> Create a new key at the provider and delete the old one. Removing it from your code does not help if someone already copied it.</li>
+<li><b>Move the call to the server.</b> Put the request in a server-side function, such as a Supabase Edge Function, a Next.js API route or a Replit backend, and store the key as a server secret.</li>
+<li><b>Check your usage and billing.</b> Look for charges or requests you don't recognize, and set a spending limit where the provider allows it.</li>
+</ol>
+<h2>A prompt you can give your AI builder</h2>
+<p class=prompt>Find every API key or secret in this project. List which ones are safe to be public and which must stay secret. Move every secret key out of frontend code and out of any VITE_, NEXT_PUBLIC_ or REACT_APP_ variable. Create a server-side function for each call that needs a secret, store the key as a server secret, and have the frontend call that function instead.</p>
+<h2>Keep checking after changes</h2>
+<p>A new prompt can add a key back into the frontend without you noticing. Checking the live site after each big update catches this early. See also <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a> and the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>.</p>"""),
 }
 
 def render(slug):
