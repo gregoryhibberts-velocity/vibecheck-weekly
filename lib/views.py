@@ -104,9 +104,10 @@ def report(scan, mode="full"):
     c = {k: sum(1 for x in items if x["severity"] == k) for k in ("critical","warning","info","pass")}
     head = f"<small>REPORT</small><h1>{E(m.get('final_url', m['url']))}</h1>"
     if mode == "teaser":
+        n = c["critical"] + c["warning"]; what = f"the {n} issues we found" if n else "your full results"
         return page("Your report", head + f"""<div class=card><span class="score blur">{r['score']}</span>/100 &nbsp; <span class=sub>Your check is done. We found <b>{c['critical']} critical</b> and <b>{c['warning']} warning</b> issues.</span></div>
-<form class=lock method=post action=/r/{tok}/email><b>Where should we send your results?</b><p>Enter your email to see your score and the full list of problems.</p>
-<input type=email name=email required placeholder="you@example.com"><button>Show my results</button><p><small>We'll email you a link to this report. Unsubscribe any time.</small></p></form>""")
+<form class=lock method=post action=/r/{tok}/email><b>Your free results are ready.</b><p>Enter your email to see your score and {what}. It's free, and no card is needed.</p>
+<input type=email name=email required placeholder="you@example.com" aria-label="Your email" autocomplete=email><button>Show my free results</button><p><small>We'll also email you a link to this report. Unsubscribe any time.</small></p></form>""")
     out = [head, f"<div class=card><span class=score>{r['score']}</span>/100 &nbsp; <span class=sub>{c['critical']} critical · {c['warning']} warnings · {c['info']} notes · {c['pass']} passed</span><br>"
            f"<small>Scanned {time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime(scan['created_at']))} · {m.get('scripts_checked',0)} script files checked · HTML loaded in {m.get('load_seconds','?')}s</small></div>"]
     if mode == "titles":
