@@ -74,7 +74,7 @@ def landing():
 <div><b>Security basics</b><br>HTTPS, redirects and the headers that block common attacks.</div>
 <div><b>Google visibility</b><br>Titles, descriptions, social previews, robots.txt, sitemap and empty single-page apps.</div></div>
 <h2>Pricing</h2>
-<div class=grid><div><b>Free check</b><div class=price>$0</div>Score and list of problems.</div>
+<div class=grid><div><b>Free check</b><div class=price>$0</div>Free scan with the list of issues found.</div>
 <div><b>Full report</b><div class=price>$9</div>One-time. Every detail plus fix prompts.</div>
 <div><b>Weekly monitoring</b><div class=price>$19<small>/mo</small></div>Re-checked every week, alerts on new issues. $49/mo for up to 5 apps.</div></div>
 <p style='text-align:center'><small style='color:#5b6474'>+ sales tax where applicable</small></p>
@@ -92,8 +92,9 @@ def landing():
 def pricing():
     p = config.PLANS
     return page("Pricing", f"""<h1>Pricing</h1><p class=sub>Your first check is free. Weekly monitoring re-checks your app every week and emails you only what changed.</p>
-<div class=grid style='grid-template-columns:1fr 1fr 1fr'>
-<div><b>Free</b><div class=price>$0</div>One full scan of your app, with the issue list.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#2563eb;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start a free check</a></div>
+<div class=grid style='grid-template-columns:1fr 1fr 1fr 1fr'>
+<div><b>Free</b><div class=price>$0</div>Free scan with the list of issues found.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#2563eb;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start a free check</a></div>
+<div><b>Full report, $9 one-time</b><div class=price>$9</div>The details behind each issue and step-by-step fixes for one scan, no subscription.</div>
 <div><b>{p['solo']['name']}</b><div class=price>${p['solo']['price']}<small>/mo</small></div>Weekly monitoring for 1 app, alerts on new issues, fix prompts.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#2563eb;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start free, then get Solo</a></div>
 <div><b>{p['pro']['name']}</b><div class=price>${p['pro']['price']}<small>/mo</small></div>Weekly monitoring for up to 5 apps.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#2563eb;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start free, then get Pro</a></div></div>
 <p style='text-align:center'><small style='color:#5b6474'>+ sales tax where applicable</small></p>
