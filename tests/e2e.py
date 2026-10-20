@@ -32,6 +32,20 @@ s, _, body = req("GET", "/api/cron/weekly", headers={"Authorization": "Bearer " 
 subprocess.run(["psql", "-h", "/tmp/pg", "-p", "55432", "-U", "vc", "-d", "vibecheck", "-qc", "UPDATE scans SET created_at = created_at - 7*86400"], check=True)
 s, _, body = req("GET", "/api/cron/weekly", headers={"Authorization": "Bearer " + os.environ["CRON_SECRET"]}); check("cron rescans weekly site", '"scanned"' in body, body)
 codes = [req("POST", f"/site/{key}/scan")[0] for _ in range(6)]; check("rate limit kicks in (per email 5/day)", 429 in codes, codes)
+import xml.dom.minidom
+s, _, body = req("GET", "/tips"); check("tips index", s == 200 and "/tips/" in body, s)
+slug = json.load(open(os.path.join(os.path.dirname(__file__), "..", "lib", "tips.json")))[0]["slug"]
+s, _, body = req("GET", "/tips/" + slug); check("tip page", s == 200, s)
+s, _, body = req("GET", "/tips/no-such-tip"); check("unknown tip 404", s == 404, s)
+s, _, body = req("GET", "/tips/rss.xml"); xml.dom.minidom.parseString(body); check("rss valid xml with item", s == 200 and "<item>" in body, s)
+s, _, body = req("GET", "/sitemap.xml"); check("sitemap lists tips", "/tips/" + slug in body)
+s, _, body = req("POST", "/unsubscribe?e=x%40example.com&t=bad", raw=b"List-Unsubscribe=One-Click"); check("one-click unsubscribe rejects bad token", s == 400, s)
+tok = hmac.new(("unsub:" + os.environ["CRON_SECRET"]).encode(), b"u@example.com", hashlib.sha256).hexdigest()[:32]
+s, _, body = req("POST", f"/unsubscribe?e=u%40example.com&t={tok}", raw=b"List-Unsubscribe=One-Click"); check("one-click unsubscribe ok", s == 200, s)
+s, _, body = req("GET", "/api/cron/unsub-sync", headers={"Authorization": "Bearer " + os.environ["CRON_SECRET"]}); d = json.loads(body)
+check("unsub sync merges local + Resend", "u@example.com" in d["unsubscribed"] and "gone@example.com" in d["unsubscribed"], body)
+calls = [json.loads(l) for l in open(os.path.join(os.path.dirname(__file__), "mock_calls.jsonl"))]
+check("Resend contact PATCHed unsubscribed=true", any(c.get("method") == "PATCH" and "u%40example.com" in c["path"] and '"unsubscribed": true' in c["body"] for c in calls))
 calls = [json.loads(l) for l in open(os.path.join(os.path.dirname(__file__), "mock_calls.jsonl"))]
 paths = [c["path"] for c in calls]
 check("Resend audience contact added", any(x.startswith("/audiences/aud_mock/contacts") for x in paths))

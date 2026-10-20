@@ -20,7 +20,7 @@ DEFAULT_DESC = "Weekly security and Google-visibility check for apps built with 
 def page(title, body, extra_head="", desc=None):
     return (f"<!doctype html><html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>{E(title)}</title>"
             f"<meta name=description content='{E(desc or DEFAULT_DESC)}'>{extra_head}<style>{CSS}</style></head>"
-            f"<body><div class=wrap><nav><a href=/><b>{E(config.APP_NAME)}</b></a><a href=/pricing>Pricing</a><a href=/guides>Guides</a></nav>{body}</div>{SCAN_JS}</body></html>")
+            f"<body><div class=wrap><nav><a href=/><b>{E(config.APP_NAME)}</b></a><a href=/pricing>Pricing</a><a href=/guides>Guides</a><a href=/tips>Tips</a></nav>{body}</div>{SCAN_JS}</body></html>")
 def landing():
     return page(f"{config.APP_NAME} – Is your AI-built app leaking keys?", """
 <section class=hero><small class=eyebrow>FREE 30-SECOND CHECK</small>

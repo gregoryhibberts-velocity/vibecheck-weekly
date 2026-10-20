@@ -18,6 +18,16 @@ def do_unsubscribe(email):
         db.q("INSERT INTO unsubscribes(email, created_at) VALUES(?,?)", (email, db.now()))
     crm.unsubscribe(email)
 
+def sync_unsubscribes():
+    """Two-way sync between the local unsubscribes table and the Resend audience (unsubscribed=true)."""
+    local = {r["email"].lower() for r in db.all("SELECT email FROM unsubscribes")}
+    contacts = crm.list_contacts() if crm._ok() else []
+    remote = {c["email"].lower() for c in contacts if c.get("unsubscribed")}
+    pulled = sorted(remote - local)
+    for e in pulled: db.q("INSERT INTO unsubscribes(email, created_at) VALUES(?,?)", (e, db.now()))
+    pushed = sorted(e for e in local - remote if crm.unsubscribe(e))
+    return {"local_added": len(pulled), "resend_updated": len(pushed), "unsubscribed": sorted(local | remote)}
+
 def _wrap(paras, button, email):
     u = unsub_url(email)
     body = "".join(f"<p style='margin:0 0 14px'>{p}</p>" for p in paras)

@@ -2,7 +2,7 @@
 import json, os, re, secrets, sys, urllib.parse
 from http.server import BaseHTTPRequestHandler
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from lib import config, db, scanner, verify, ratelimit, crm, mailer, billing, views, nudges, guides
+from lib import config, db, scanner, verify, ratelimit, crm, mailer, billing, views, nudges, guides, tips
 
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$")
 
@@ -89,9 +89,14 @@ class handler(BaseHTTPRequestHandler):
         if path == "/pricing": return self._send(200, views.pricing())
         if path == "/guides": return self._send(200, guides.index())
         if path.startswith("/guides/") and path[8:] in guides.GUIDES: return self._send(200, guides.render(path[8:]))
+        if path == "/tips": return self._send(200, tips.index())
+        if path == "/tips/rss.xml": return self._send(200, tips.rss(), "application/rss+xml; charset=utf-8")
+        if path.startswith("/tips/"):
+            h = tips.render(path[6:])
+            if h: return self._send(200, h)
         if path == "/robots.txt": return self._send(200, f"User-agent: *\nAllow: /\nDisallow: /site/\nDisallow: /report/\nDisallow: /r/\nSitemap: {config.BASE_URL}/sitemap.xml\n", "text/plain")
         if path == "/sitemap.xml":
-            return self._send(200, f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>{config.BASE_URL}/</loc></url><url><loc>{config.BASE_URL}/pricing</loc></url><url><loc>{config.BASE_URL}/guides</loc></url>{"".join(f"<url><loc>{config.BASE_URL}/guides/{g}</loc></url>" for g in guides.GUIDES)}</urlset>', "application/xml")
+            return self._send(200, f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>{config.BASE_URL}/</loc></url><url><loc>{config.BASE_URL}/pricing</loc></url><url><loc>{config.BASE_URL}/guides</loc></url>{"".join(f"<url><loc>{config.BASE_URL}/guides/{g}</loc></url>" for g in guides.GUIDES)}<url><loc>{config.BASE_URL}/tips</loc></url>{"".join(f"<url><loc>{tips.url(t)}</loc><lastmod>{t['date']}</lastmod></url>" for t in tips.published())}</urlset>', "application/xml")
         if path == "/api/health": return self._json(200, {"ok": True, "db": "postgres" if db.PG else "sqlite"})
         if path in ("/billing/success", "/billing/unlocked"):
             sid = urllib.parse.parse_qs(p.query).get("session_id", [""])[0]
@@ -109,11 +114,14 @@ class handler(BaseHTTPRequestHandler):
             if t: return self._json(200, {"test": nudges.send_tests(t, qs.get("report", [""])[0])})
             if qs.get("only", [""])[0] == "audience": return self._json(200, {"audience_added": nudges.sync_audience()})
             return self._json(200, nudges.run())
+        if path == "/api/cron/unsub-sync":
+            if not config.CRON_SECRET or self.headers.get("Authorization") != f"Bearer {config.CRON_SECRET}": return self._json(401, {"error": "unauthorized"})
+            return self._json(200, nudges.sync_unsubscribes())
         if path == "/unsubscribe":
             qs = urllib.parse.parse_qs(p.query); e = qs.get("e", [""])[0].lower(); t = qs.get("t", [""])[0]
             if not nudges.check_unsub(e, t): return self._send(400, views.message("Link not valid", "This unsubscribe link is not valid."))
             nudges.do_unsubscribe(e)
-            return self._send(200, views.message("Unsubscribed", "You will no longer receive follow-up emails from VibeCheck Weekly."))
+            return self._send(200, views.message("Unsubscribed", "You will no longer receive emails from VibeCheck Weekly."))
         m = re.fullmatch(r"/site/([\w-]+)", path)
         if m:
             s = self._site(m.group(1))

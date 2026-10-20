@@ -1,0 +1,14 @@
+[
+  {
+    "slug": "keep-secret-api-keys-out-of-frontend-code",
+    "date": "2026-10-20",
+    "status": "published",
+    "subject": "Is your app's public code giving away your secret keys?",
+    "title": "Keep secret API keys out of your frontend code",
+    "body": [
+      "When you build an app with an AI tool, it is easy to end up with secret keys in the code that runs in the browser. Anything in your site's public JavaScript can be read by any visitor, including payment keys, AI provider keys and database admin keys.",
+      "Some keys are meant to be public. A Supabase anon key is normal, for example, but it is only safe if Row Level Security is turned on for every table. A Supabase service_role key is different: it bypasses all of your database rules and should never reach the browser.",
+      "The fix is to move secret keys into server-side environment variables, such as an Edge Function or API route, and have the browser call that. If a key has already been exposed, revoke it and create a new one."
+    ]
+  }
+]

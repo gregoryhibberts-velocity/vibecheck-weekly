@@ -11,5 +11,12 @@ def add_signup(email):
     return True
 def unsubscribe(email):
     if not _ok(): return False
-    s, _ = http.request("DELETE", _base() + "/" + urllib.parse.quote(email), None, _h())
-    return s < 300 or s == 404
+    s, r = http.request("PATCH", _base() + "/" + urllib.parse.quote(email), {"unsubscribed": True}, _h())
+    if s == 404:  # not in the audience yet: add it as unsubscribed so it stays opted out
+        s, r = http.request("POST", _base(), {"email": email, "unsubscribed": True}, _h())
+    if s >= 300: print("[crm] unsubscribe failed", s, r)
+    return s < 300
+def list_contacts():
+    s, r = http.request("GET", _base(), None, _h())
+    if s >= 300: raise RuntimeError(f"[crm] list failed {s} {r}")
+    return r.get("data", [])
