@@ -88,6 +88,47 @@ GUIDES = {
 <p class=prompt>Find every API key or secret in this project. List which ones are safe to be public and which must stay secret. Move every secret key out of frontend code and out of any VITE_, NEXT_PUBLIC_ or REACT_APP_ variable. Create a server-side function for each call that needs a secret, store the key as a server secret, and have the frontend call that function instead.</p>
 <h2>Keep checking after changes</h2>
 <p>A new prompt can add a key back into the frontend without you noticing. Checking the live site after each big update catches this early. See also <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a> and the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>.</p>"""),
+"hide-api-keys-in-ai-built-apps": dict(
+ title="How to hide API keys in a Lovable, Bolt, v0 or Cursor app",
+ desc="Which API keys are safe in the browser, which are not, and how to move secret keys for OpenAI, Stripe and Supabase into server-side functions in apps built with AI tools.",
+ body="""<p class=sub>AI app builders make it easy to connect OpenAI, Stripe or Supabase in a few prompts. The quickest way to get that working is often to put the key straight into frontend code, which means anyone who opens your site can copy it. This guide explains which keys are safe to ship, how to move the rest to the server, and what to do if a key has already been exposed.</p>
+<h2>Why a key in frontend code is public</h2>
+<p>Everything your app sends to the browser can be read by visitors: the HTML, the JavaScript bundle and every network request. Minifying or bundling the code does not hide anything. Keeping a key in a <code>.env</code> file does not help if frontend code reads it, because the build copies the value into the published JavaScript.</p>
+<p>Build tools make this explicit with naming rules. In Vite projects, which Lovable and Bolt commonly generate, any variable starting with <code>VITE_</code> is copied into the browser bundle. In Next.js projects, which v0 generates, the same is true of variables starting with <code>NEXT_PUBLIC_</code>. Those prefixes are for values that are meant to be public. A secret key should never carry them.</p>
+<h2>Which keys are meant to be public</h2>
+<p>Some keys are designed to sit in the browser, and finding them in your code is not a problem on its own:</p>
+<ul>
+<li><b>Supabase anon or publishable key.</b> Safe in the browser, but only if Row Level Security is on. Your database rules decide what it can do. See the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>.</li>
+<li><b>Stripe publishable key</b> (starts with <code>pk_live_</code> or <code>pk_test_</code>). It can start a checkout but cannot read payments or issue refunds.</li>
+<li><b>Firebase web config and Google Maps keys.</b> These identify your project. Protect them with Firebase Security Rules and, for Google keys, restrictions to your own domain in the Google Cloud console.</li>
+</ul>
+<h2>Which keys must stay on the server</h2>
+<ul>
+<li><b>Supabase service_role or secret key.</b> It bypasses all Row Level Security.</li>
+<li><b>Stripe secret and restricted keys</b> (<code>sk_live_</code>, <code>rk_live_</code>). They can read customer data and move money.</li>
+<li><b>AI provider keys</b> for OpenAI, Anthropic and similar services. Anyone holding one can run requests that are billed to your account.</li>
+<li><b>Email, SMS and database credentials</b>, GitHub tokens, AWS keys and any private key file.</li>
+</ul>
+<h2>How to move a secret key to the server</h2>
+<p>The pattern is the same in every tool. The browser calls a small server-side function that you control. That function reads the key from a secret setting, calls the provider and returns only the result. The key itself never reaches the browser.</p>
+<ul>
+<li><b>Lovable and Bolt with Supabase:</b> use a Supabase Edge Function and store the key as a secret for that function. Both builders can create the function for you if you ask.</li>
+<li><b>v0 and other Next.js apps:</b> use an API route or a Server Action, and add the key as an environment variable without the <code>NEXT_PUBLIC_</code> prefix in your Vercel project settings.</li>
+<li><b>Replit:</b> store the key in Replit's Secrets tool and read it only from your server code, not from code that runs in the browser.</li>
+<li><b>Cursor or any local project:</b> keep keys in a <code>.env</code> file that is listed in <code>.gitignore</code>, read them only in server code, and set the same values in your hosting provider's environment settings.</li>
+</ul>
+<p>Once the function exists, protect it as well. If anyone can call it without signing in, they can still use your key indirectly. Check that the user is logged in before the function does any paid work, and limit how often each user can call it.</p>
+<h2>A prompt you can give your AI builder</h2>
+<p class=prompt>Find every API key or secret used in my frontend code, including values read from environment variables that start with VITE_ or NEXT_PUBLIC_. For each one, tell me whether it is meant to be public. Move every secret key into a server-side function that reads it from a secret or environment variable, have the frontend call that function instead, and require a signed-in user before the function runs. List the keys you moved so I can rotate them.</p>
+<h2>If a key was already exposed</h2>
+<ol>
+<li><b>Rotate the key first.</b> Revoke it in the provider's dashboard and create a new one. Removing it from your code is not enough, because the old key keeps working and copies of your published code may already exist.</li>
+<li><b>Check your Git history.</b> If the key was ever committed, it remains in the repository's history even after you delete the file. Treat it as exposed, especially if the repository is public.</li>
+<li><b>Review usage and billing.</b> Look for requests or charges you don't recognize, and set a usage limit or budget alert where the provider offers one.</li>
+<li><b>Store the new key only on the server</b>, using the steps above.</li>
+</ol>
+<h2>Checking your live app</h2>
+<p>Open your published site, open the browser developer tools and search the loaded scripts for <code>sk_live_</code>, <code>sk-</code>, <code>sk-ant-</code> and <code>service_role</code>. The free check below runs the same kind of search across your page and its script files for common secret key formats, and tells you which keys it found and how to fix them. It cannot see keys that only exist on your server, which is exactly where they should be.</p>"""),
 }
 
 def render(slug):
