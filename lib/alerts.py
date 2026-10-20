@@ -32,11 +32,13 @@ def build(ev):
             p = PLAN_NAMES.get(md.get("plan", "solo"), md.get("plan")); subj, what = f"New subscriber: {p}", f"Subscription: {p}"
         return subj, what, _money(o.get("amount_total"), o.get("currency")), email, _site_for(md, o.get("customer"), o.get("subscription"))
     if t == "invoice.paid":
-        if o.get("billing_reason") == "subscription_create" or not o.get("amount_paid"): return None  # covered by checkout alert
+        sub = o.get("subscription") or (((o.get("parent") or {}).get("subscription_details") or {}).get("subscription"))
+        # Only true renewals. One-time payments (Managed Payments invoices) and first invoices are covered by the checkout alert.
+        if not sub or o.get("billing_reason") != "subscription_cycle" or not o.get("amount_paid"): return None
         line = ((o.get("lines") or {}).get("data") or [{}])[0]
         pid = (line.get("price") or {}).get("id") or ((line.get("pricing") or {}).get("price_details") or {}).get("price")
         p = PLAN_NAMES.get(_plan_for_price(pid), "subscription")
-        return f"Renewal: {p}", f"Subscription renewal: {p}", _money(o.get("amount_paid"), o.get("currency")), o.get("customer_email"), _site_for({}, o.get("customer"), o.get("subscription"))
+        return f"Renewal: {p}", f"Subscription renewal: {p}", _money(o.get("amount_paid"), o.get("currency")), o.get("customer_email"), _site_for({}, o.get("customer"), sub)
     if t == "charge.refunded":
         return "Cancelled: refund issued", "Refund", "-" + _money(o.get("amount_refunded"), o.get("currency")), (o.get("billing_details") or {}).get("email") or o.get("receipt_email"), _site_for(md, o.get("customer"))
     if t == "customer.subscription.deleted":
