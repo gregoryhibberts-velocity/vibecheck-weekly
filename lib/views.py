@@ -1,7 +1,7 @@
 import html, json, time
 from . import config
 E = html.escape
-CSS = """body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0;background:#f6f8fc linear-gradient(180deg,#eef3ff 0%,#f8fafd 420px,#ffffff 100%) no-repeat;color:#1f2937}
+CSS = """html{background:#fff}body{min-height:100vh;font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0;background:#fff linear-gradient(180deg,#eef3ff 0%,#f8fafd 420px,#ffffff 100%) no-repeat;color:#1f2937}
 a{color:#1d4ed8}.wrap{max-width:860px;margin:0 auto;padding:40px 24px}h1{font-size:40px;margin:.2em 0}
 .sub{color:#4b5563;font-size:19px;line-height:1.5}.card{background:#fff;border:1px solid #e3e8f0;box-shadow:0 1px 3px rgba(16,24,40,.04);border-radius:14px;padding:24px;margin:22px 0}
 input[type=url],input[type=email]{width:100%;box-sizing:border-box;padding:13px;margin:6px 0 14px;border-radius:8px;border:1px solid #cfd6e3;background:#fff;color:#1f2937;font-size:16px}
