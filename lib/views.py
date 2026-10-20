@@ -67,6 +67,7 @@ def pricing():
 <div><b>Free</b><div class=price>$0</div>One full scan of your app, with the issue list.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#3b82f6;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start a free check</a></div>
 <div><b>{p['solo']['name']}</b><div class=price>${p['solo']['price']}<small>/mo</small></div>Weekly monitoring for 1 app, alerts on new issues, fix prompts.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#3b82f6;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start free, then get Solo</a></div>
 <div><b>{p['pro']['name']}</b><div class=price>${p['pro']['price']}<small>/mo</small></div>Weekly monitoring for up to 5 apps.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#3b82f6;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start free, then get Pro</a></div></div>
+<p style='text-align:center'><small style='color:#888'>+ sales tax where applicable</small></p>
 <p><small>Plans start from a free check of your app: scan it, confirm you own it, then choose Solo or Pro on your site page.</small></p>""")
 def message(title, text, code=None):
     return page(title, f"<h1>{E(title)}</h1><p class=sub>{text}</p><a href=/>Back to start</a>")
