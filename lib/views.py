@@ -21,6 +21,32 @@ def page(title, body, extra_head="", desc=None):
     return (f"<!doctype html><html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>{E(title)}</title>"
             f"<meta name=description content='{E(desc or DEFAULT_DESC)}'>{extra_head}<style>{CSS}</style></head>"
             f"<body><div class=wrap><nav><a href=/><b>{E(config.APP_NAME)}</b></a><a href=/pricing>Pricing</a><a href=/guides>Guides</a><a href=/tips>Tips</a></nav>{body}<footer><small>Questions or feedback? Email <a href='mailto:{config.SUPPORT_EMAIL}'>{config.SUPPORT_EMAIL}</a>.</small></footer></div>{SCAN_JS}</body></html>")
+FAQ_LD = [
+ ("Is the scan safe for my app?", "Yes. It is read-only and passive: VibeCheck loads your public pages and scripts like a normal visitor. No logins, no attacks, no writes and no database probing."),
+ ("Do you need access to my code or Supabase?", "No. The check only uses what your site already serves publicly. Weekly monitoring asks you to add a small verification tag so only the owner can set it up."),
+ ("Can it prove my database is secure?", "No outside scan can. VibeCheck flags the warning signs, such as exposed keys and Supabase usage, and gives you a prompt to have your AI tool audit your Row Level Security rules."),
+ ("What is the fix prompt?", "A ready-made instruction you paste into Lovable, Bolt, Cursor or Replit so the AI fixes the issue for you."),
+ ("Can I cancel monitoring?", "Yes, any time. The $9 report is a one-time payment, not a subscription."),
+ ("How do I check if my Lovable app is secure?", "Check four things: no secret keys (such as the Supabase service_role key or an OpenAI key) in your live JavaScript, Row Level Security turned on for every Supabase table, private pages that refuse to load when you are logged out, and basic security headers. VibeCheck Weekly's free scan checks the keys, headers and Google visibility automatically."),
+ ("Is it safe to have the Supabase anon key in my frontend?", "Yes, the anon key is designed to be public, as long as Row Level Security is on and your policies are correct. The service_role key bypasses all security rules and must never appear in browser code."),
+]
+def landing_head():
+    b = config.BASE_URL
+    app = {"@context": "https://schema.org", "@type": "SoftwareApplication", "name": config.APP_NAME, "url": b + "/",
+           "applicationCategory": "SecurityApplication", "operatingSystem": "Web",
+           "description": "A free, read-only security and Google-visibility scan for live apps built with Lovable, Bolt, Replit, v0, Cursor and Supabase, with optional weekly rescans.",
+           "offers": [{"@type": "Offer", "name": "Free check", "price": "0", "priceCurrency": "USD"},
+                      {"@type": "Offer", "name": "Full report (one time)", "price": "9", "priceCurrency": "USD"},
+                      {"@type": "Offer", "name": "Solo weekly monitoring", "price": "19", "priceCurrency": "USD"},
+                      {"@type": "Offer", "name": "Pro weekly monitoring (up to 5 apps)", "price": "49", "priceCurrency": "USD"}]}
+    faq = {"@context": "https://schema.org", "@type": "FAQPage",
+           "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in FAQ_LD]}
+    ld = lambda o: "<script type='application/ld+json'>" + json.dumps(o).replace("<", "\\u003c") + "</script>"
+    t = f"{config.APP_NAME}: free security and Google check for AI-built apps"
+    return (f"<link rel=canonical href='{b}/'><meta property='og:type' content='website'><meta property='og:url' content='{b}/'>"
+            f"<meta property='og:title' content='{E(t)}'><meta property='og:description' content='{E(LANDING_DESC)}'>"
+            f"<meta name='twitter:card' content='summary'><meta name='twitter:site' content='@VibeCheck_Wkly'>" + ld(app) + ld(faq))
+LANDING_DESC = "Free 30-second check for apps built with Lovable, Bolt, Replit, v0 or Cursor: finds exposed API keys, Supabase service_role leaks, missing security headers and problems that keep Google from finding your site."
 def landing():
     return page(f"{config.APP_NAME} – Is your AI-built app leaking keys?", """
 <section class=hero><small class=eyebrow>FREE 30-SECOND CHECK</small>
@@ -30,6 +56,7 @@ def landing():
 <input type=url name=url required placeholder="https://myapp.lovable.app" aria-label="Your app URL">
 <label class=own><input type=checkbox name=owner value=1 required> I own this app or am allowed to test it</label>
 <button>Check my app free</button></form>
+<p class=trust><small>Free, with no signup, no card and nothing to install. Read-only: we never log in or change anything.</small></p>
 <p class=works>Works with apps built in <b>Lovable</b>, <b>Bolt</b>, <b>Cursor</b>, <b>Replit</b>, v0, or by hand.</p></section>
 <h2>What a report looks like</h2>
 <div class="card sample"><div><span class=score>58</span>/100 &nbsp; <span class=sub>2 critical · 3 warnings · 4 passed</span></div>
@@ -56,10 +83,12 @@ def landing():
 <details><summary>Do you need access to my code or Supabase?</summary>No. The check only uses what your site already serves publicly. Weekly monitoring asks you to add a small verification tag so only the owner can set it up.</details>
 <details><summary>Can it prove my database is secure?</summary>No outside scan can. We flag the warning signs (exposed keys, Supabase usage) and give you a prompt to have your AI tool audit your Row Level Security rules.</details>
 <details><summary>What's the fix prompt?</summary>A ready-made instruction you paste into Lovable, Bolt, Cursor or Replit so the AI fixes the issue for you.</details>
-<details><summary>Can I cancel monitoring?</summary>Yes, any time. The $9 report is a one-time payment, not a subscription.</details></div>
+<details><summary>Can I cancel monitoring?</summary>Yes, any time. The $9 report is a one-time payment, not a subscription.</details>
+<details><summary>How do I check if my Lovable app is secure?</summary>Check four things: no secret keys (such as the Supabase service_role key or an OpenAI key) in your live JavaScript, Row Level Security turned on for every Supabase table, private pages that refuse to load when you are logged out, and basic security headers. VibeCheck's free scan checks the keys, headers and visibility for you, and our <a href=/guides/is-my-lovable-app-secure>Lovable security checklist</a> covers the rest.</details>
+<details><summary>Is it safe to have the Supabase anon key in my frontend?</summary>Yes, the anon key is designed to be public, as long as Row Level Security is on and your policies are correct. The service_role key is different: it bypasses all security rules and must never appear in browser code. See the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>.</details></div>
 <div class="card cta2"><h2>Find out in 30 seconds.</h2><form method=post action=/scan>
 <input type=url name=url required placeholder="https://myapp.lovable.app" aria-label="Your app URL">
-<label class=own><input type=checkbox name=owner value=1 required> I own this app or am allowed to test it</label><button>Check my app free</button></form></div>""")
+<label class=own><input type=checkbox name=owner value=1 required> I own this app or am allowed to test it</label><button>Check my app free</button></form></div>""", landing_head(), desc=LANDING_DESC)
 def pricing():
     p = config.PLANS
     return page("Pricing", f"""<h1>Pricing</h1><p class=sub>Your first check is free. Weekly monitoring re-checks your app every week and emails you only what changed.</p>

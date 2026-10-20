@@ -94,6 +94,7 @@ class handler(BaseHTTPRequestHandler):
         if path.startswith("/tips/"):
             h = tips.render(path[6:])
             if h: return self._send(200, h)
+        if path == "/llms.txt": return self._send(200, guides.llms_txt(), "text/plain; charset=utf-8")
         if path == "/robots.txt": return self._send(200, f"User-agent: *\nAllow: /\nDisallow: /site/\nDisallow: /report/\nDisallow: /r/\nSitemap: {config.BASE_URL}/sitemap.xml\n", "text/plain")
         if path == "/sitemap.xml":
             return self._send(200, f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>{config.BASE_URL}/</loc></url><url><loc>{config.BASE_URL}/pricing</loc></url><url><loc>{config.BASE_URL}/guides</loc></url>{"".join(f"<url><loc>{config.BASE_URL}/guides/{g}</loc></url>" for g in guides.GUIDES)}<url><loc>{config.BASE_URL}/tips</loc></url>{"".join(f"<url><loc>{tips.url(t)}</loc><lastmod>{t['date']}</lastmod></url>" for t in tips.published())}</urlset>', "application/xml")

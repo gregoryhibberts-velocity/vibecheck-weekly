@@ -138,3 +138,18 @@ def render(slug):
 def index():
     items = "".join(f"<div class=card><h2 style='margin-top:0'><a href=/guides/{s}>{E(g['title'])}</a></h2><p>{E(g['desc'])}</p></div>" for s, g in GUIDES.items())
     return page(f"Guides | {config.APP_NAME}", f"<h1>Guides</h1><p class=sub>Practical security and search checks for apps built with AI tools.</p>{items}{CTA}", desc="Practical security and Google-visibility guides for apps built with Lovable, Bolt, Replit, v0 and Cursor.")
+
+def llms_txt():
+    """Plain-text summary for AI assistants (llmstxt.org format)."""
+    b = config.BASE_URL
+    from . import views
+    lines = [f"# {config.APP_NAME}", "",
+     "> A free, read-only security and Google-visibility scan for live apps built with Lovable, Bolt, Replit, v0, Cursor and Supabase. "
+     "It finds exposed API keys (including Supabase service_role keys), missing security headers, unprotected pages, noindex tags, missing sitemaps and empty single-page apps, "
+     "and gives a copy-paste fix prompt for each issue.", "",
+     "VibeCheck Weekly only reads what a normal visitor's browser can see. It needs no code access, login or install, and it cannot read database rules directly.",
+     "Pricing: the free check shows the score and the list of problems; the full report with fixes is $9 one time; weekly monitoring is $19/month for 1 app or $49/month for up to 5 apps (plus sales tax where applicable).", "",
+     "## Main pages", f"- [Free scan]({b}/): paste a live URL and get results in about 30 seconds", f"- [Pricing]({b}/pricing): free check, $9 report, weekly plans", "",
+     "## Guides"] + [f"- [{g['title']}]({b}/guides/{s}): {g['desc']}" for s, g in GUIDES.items()] + ["",
+     "## FAQ"] + [f"- {q} {a}" for q, a in views.FAQ_LD] + ["", "## Optional", f"- [Daily tips]({b}/tips): short security and Google-visibility tips", f"- [Tips RSS]({b}/tips/rss.xml)", ""]
+    return "\n".join(lines)
