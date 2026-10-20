@@ -40,6 +40,12 @@ def build(ev):
         p = PLAN_NAMES.get(_plan_for_price(pid), "subscription")
         return f"Renewal: {p}", f"Subscription renewal: {p}", _money(o.get("amount_paid"), o.get("currency")), o.get("customer_email"), _site_for({}, o.get("customer"), sub)
     if t == "charge.refunded":
+        if not md.get("scan_token") and o.get("payment_intent") and config.STRIPE_SECRET_KEY:
+            try:
+                from . import http
+                st, r = http.request("GET", config.STRIPE_API_BASE + "/v1/checkout/sessions?payment_intent=" + o["payment_intent"], None, {"Authorization": f"Bearer {config.STRIPE_SECRET_KEY}"})
+                if st == 200 and r.get("data"): md = r["data"][0].get("metadata") or {}
+            except Exception: pass
         return "Cancelled: refund issued", "Refund", "-" + _money(o.get("amount_refunded"), o.get("currency")), (o.get("billing_details") or {}).get("email") or o.get("receipt_email"), _site_for(md, o.get("customer"))
     if t == "customer.subscription.deleted":
         item = ((o.get("items") or {}).get("data") or [{}])[0]
