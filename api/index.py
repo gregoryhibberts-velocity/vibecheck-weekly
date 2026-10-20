@@ -2,7 +2,7 @@
 import json, os, re, secrets, sys, urllib.parse
 from http.server import BaseHTTPRequestHandler
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from lib import config, db, scanner, verify, ratelimit, crm, mailer, billing, views, nudges
+from lib import config, db, scanner, verify, ratelimit, crm, mailer, billing, views, nudges, guides
 
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$")
 
@@ -87,9 +87,11 @@ class handler(BaseHTTPRequestHandler):
             if not t: return self._send(404, views.message("Not found", "Nothing here."))
             return self._send(200, f'<!doctype html><html><head><title>VibeCheck test site</title><meta name="vibecheck-verification" content="{t}"><meta name="robots" content="noindex"></head><body><h1>VibeCheck Weekly internal test site</h1><p>Used only for automated testing.</p></body></html>')
         if path == "/pricing": return self._send(200, views.pricing())
+        if path == "/guides": return self._send(200, guides.index())
+        if path.startswith("/guides/") and path[8:] in guides.GUIDES: return self._send(200, guides.render(path[8:]))
         if path == "/robots.txt": return self._send(200, f"User-agent: *\nAllow: /\nDisallow: /site/\nDisallow: /report/\nDisallow: /r/\nSitemap: {config.BASE_URL}/sitemap.xml\n", "text/plain")
         if path == "/sitemap.xml":
-            return self._send(200, f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>{config.BASE_URL}/</loc></url><url><loc>{config.BASE_URL}/pricing</loc></url></urlset>', "application/xml")
+            return self._send(200, f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>{config.BASE_URL}/</loc></url><url><loc>{config.BASE_URL}/pricing</loc></url><url><loc>{config.BASE_URL}/guides</loc></url>{"".join(f"<url><loc>{config.BASE_URL}/guides/{g}</loc></url>" for g in guides.GUIDES)}</urlset>', "application/xml")
         if path == "/api/health": return self._json(200, {"ok": True, "db": "postgres" if db.PG else "sqlite"})
         if path in ("/billing/success", "/billing/unlocked"):
             sid = urllib.parse.parse_qs(p.query).get("session_id", [""])[0]

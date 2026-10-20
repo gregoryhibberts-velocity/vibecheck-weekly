@@ -13,10 +13,11 @@ button{background:#3b82f6;color:#fff;border:0;border-radius:8px;padding:13px 20p
 .prompt,.code{background:#0b1020;border:1px dashed #3b4a78;padding:10px;border-radius:6px;margin-top:8px;font-size:14px;color:#d6dcf0;word-break:break-all}
 .score{font-size:60px;font-weight:800}small{color:#8a93aa}.price{font-size:36px;font-weight:800}.ok{color:#22c55e}.bad{color:#f87171}
 .hero h1{font-size:46px;line-height:1.1}.eyebrow{color:#7cc4ff;font-weight:700;letter-spacing:.08em}.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.cta input[type=url],.cta2 input[type=url]{flex:1;min-width:300px;margin:0}.own{width:100%;color:#c7cfe0}.works{color:#aab3c8}.faq details{background:#141b31;border:1px solid #243052;border-radius:10px;padding:14px 16px;margin:8px 0}.faq summary{cursor:pointer;font-weight:600}.sample{opacity:.97}.blur{filter:blur(5px);user-select:none}.lock{background:#1e2745;border:1px solid #3b4a78;border-radius:12px;padding:20px;margin:18px 0}h2{margin-top:36px}nav{display:flex;gap:18px;margin-bottom:10px}nav a{color:#aab3c8;text-decoration:none}"""
-def page(title, body, extra_head=""):
+DEFAULT_DESC = "Weekly security and Google-visibility check for apps built with Lovable, Bolt, Cursor and Supabase."
+def page(title, body, extra_head="", desc=None):
     return (f"<!doctype html><html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>{E(title)}</title>"
-            f"<meta name=description content='Weekly security and Google-visibility check for apps built with Lovable, Bolt, Cursor and Supabase.'>{extra_head}<style>{CSS}</style></head>"
-            f"<body><div class=wrap><nav><a href=/><b>{E(config.APP_NAME)}</b></a><a href=/pricing>Pricing</a></nav>{body}</div></body></html>")
+            f"<meta name=description content='{E(desc or DEFAULT_DESC)}'>{extra_head}<style>{CSS}</style></head>"
+            f"<body><div class=wrap><nav><a href=/><b>{E(config.APP_NAME)}</b></a><a href=/pricing>Pricing</a><a href=/guides>Guides</a></nav>{body}</div></body></html>")
 def landing():
     return page(f"{config.APP_NAME} – Is your AI-built app leaking keys?", """
 <section class=hero><small class=eyebrow>FREE 30-SECOND CHECK</small>
