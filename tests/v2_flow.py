@@ -23,7 +23,7 @@ with sync_playwright() as p:
         pg.goto(B + "/"); pg.screenshot(path=S + "landing.png", full_page=True)
         pg.fill("form.cta input[name=url]", T); pg.check("form.cta input[name=owner]"); pg.click("form.cta button"); pg.wait_for_url("**/r/**", timeout=90000)
         rep = pg.url; open("/workspace/agent-tools/v2_report.txt", "w").write(rep); pg.screenshot(path=S + "teaser.png", full_page=True)
-        pg.fill("input[name=email]", "test@example.com"); pg.click("form.lock button"); pg.wait_for_load_state("networkidle")
+        pg.fill("input[name=email]", "test+v2@example.com"); pg.click("form.lock button"); pg.wait_for_load_state("networkidle")
         print("titles mode:", "Unlock full report" in pg.content(), "| fix prompts hidden:", "Paste into your AI tool" not in pg.content()); pg.screenshot(path=S + "email-gate-results.png", full_page=True)
         pg.click("text=Unlock full report – $9"); pg.wait_for_load_state("load")
         print("site unlock button ->", pg.url, "|", pg.inner_text("h1")); pg.screenshot(path=S + "unlock-button-result.png", full_page=True)
