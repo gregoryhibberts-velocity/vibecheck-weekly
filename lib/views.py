@@ -50,6 +50,7 @@ def landing():
 <div class=grid><div><b>Free check</b><div class=price>$0</div>Score and list of problems.</div>
 <div><b>Full report</b><div class=price>$9</div>One-time. Every detail plus fix prompts.</div>
 <div><b>Weekly monitoring</b><div class=price>$19<small>/mo</small></div>Re-checked every week, alerts on new issues. $49/mo for up to 5 apps.</div></div>
+<p style='text-align:center'><small style='color:#888'>+ sales tax where applicable</small></p>
 <h2>FAQ</h2>
 <div class=faq><details><summary>Is the scan safe for my app?</summary>Yes. It's read-only and passive: we load your public pages and scripts like a normal visitor. No logins, no attacks, no writes, no database probing.</details>
 <details><summary>Do you need access to my code or Supabase?</summary>No. The check only uses what your site already serves publicly. Weekly monitoring asks you to add a small verification tag so only the owner can set it up.</details>
@@ -79,7 +80,7 @@ def site_page(site, account, scans, ins, verify_error=None, weekly_count=0):
 <p>Option B: serve a file at <b>{E(ins['file_path'])}</b> containing only:</p><div class=code>{E(ins['file_body'])}</div>
 <p><small>Tip for Lovable/Bolt/Cursor: paste “Add this exact meta tag to the head of index.html: {E(ins['meta'])}” into your AI tool.</small></p>{err}
 <form method=post action=/site/{k}/verify><button>Verify and run my free check</button></form>
-<p><small>Once verified, you can start weekly monitoring here: Solo $19/mo (1 app) or Pro $49/mo (up to 5 apps).</small></p></div>""")
+<p><small>Once verified, you can start weekly monitoring here: Solo $19/mo (1 app) or Pro $49/mo (up to 5 apps). + sales tax where applicable.</small></p></div>""")
     else:
         out.append(f"<div class=card><span class=ok>✔ Ownership verified</span> &nbsp; Plan: <b>{E(account['plan'].title())}</b> &nbsp; Weekly monitoring: <b>{'on' if site['weekly'] else 'off'}</b>"
                    f"<form method=post action=/site/{k}/scan style='margin-top:14px'><button>Run a new check</button></form></div>")
@@ -89,7 +90,7 @@ def site_page(site, account, scans, ins, verify_error=None, weekly_count=0):
             else:
                 out.append(f"""<div class=card><b>Keep it safe every week.</b><p>We re-check every week and email you when something new breaks.</p>
 <form method=post action=/site/{k}/checkout style='display:inline'><input type=hidden name=plan value=solo><button class=alt>Monitor 1 app – $19/mo</button></form>
-<form method=post action=/site/{k}/checkout style='display:inline;margin-left:10px'><input type=hidden name=plan value=pro><button class=alt>Monitor up to 5 apps – $49/mo</button></form></div>""")
+<form method=post action=/site/{k}/checkout style='display:inline;margin-left:10px'><input type=hidden name=plan value=pro><button class=alt>Monitor up to 5 apps – $49/mo</button></form><p><small style='color:#888'>+ sales tax where applicable</small></p></div>""")
     if scans:
         out.append("<h2>Reports</h2>" + "".join(f"<div class=f><a href=/r/{s['token']}>{time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime(s['created_at']))}</a> &nbsp; score <b>{s['score']}</b>/100</div>" for s in scans))
     out.append("<p><small>Bookmark this page: it is your private link for this site.</small></p>")
@@ -110,7 +111,7 @@ def report(scan, mode="full"):
     if mode == "titles":
         out.append(f"""<div class=lock><b>Unlock the full report: $9, one time.</b><p>See exactly where each problem is and get a copy-paste fix prompt for your AI tool for every issue.</p>
 <form method=post action=/r/{tok}/unlock style='display:inline'><button>Unlock full report – $9</button></form>
-<form method=post action=/r/{tok}/monitor style='display:inline;margin-left:10px'><button class=alt>Or monitor weekly from $19/mo</button></form><p><small>Weekly plans include full reports.</small></p></div>""")
+<form method=post action=/r/{tok}/monitor style='display:inline;margin-left:10px'><button class=alt>Or monitor weekly from $19/mo</button></form><p><small>Weekly plans include full reports. + sales tax where applicable.</small></p></div>""")
     for area in ("Security", "Supabase", "Google visibility", "Speed", "Basics"):
         sec = [x for x in items if x["area"] == area and (mode == "full" or x["severity"] != "fix")]
         if not sec: continue
