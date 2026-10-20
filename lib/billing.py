@@ -47,6 +47,10 @@ def apply_session(o):
     db.q("UPDATE scans SET unlocked=1 WHERE email=(SELECT email FROM accounts WHERE id=?)", (aid,))
     return "activated"
 def handle_event(ev):
+    res = _handle(ev)
+    from . import alerts; alerts.notify(ev)
+    return res
+def _handle(ev):
     t, o = ev.get("type"), ev.get("data", {}).get("object", {})
     if t == "checkout.session.completed": return apply_session(o)
     if t == "customer.subscription.deleted":

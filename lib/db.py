@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS scans(id {pk}, token TEXT UNIQUE NOT NULL, site_id IN
 CREATE TABLE IF NOT EXISTS rate_events(id {pk}, k TEXT NOT NULL, ts BIGINT NOT NULL);
 CREATE TABLE IF NOT EXISTS email_sends(id {pk}, email TEXT NOT NULL, kind TEXT NOT NULL, sent_at BIGINT, UNIQUE(email, kind));
 CREATE TABLE IF NOT EXISTS unsubscribes(email TEXT PRIMARY KEY, created_at BIGINT);
+CREATE TABLE IF NOT EXISTS owner_alerts(event_id TEXT PRIMARY KEY, created_at BIGINT);
 CREATE INDEX IF NOT EXISTS rate_k_ts ON rate_events(k, ts);
 """
 _conn = None
