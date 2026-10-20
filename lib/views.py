@@ -22,7 +22,7 @@ def landing():
 <section class=hero><small class=eyebrow>FREE 30-SECOND CHECK</small>
 <h1>Your AI-built app works. But is it leaking keys, or invisible to Google?</h1>
 <p class=sub>Paste your app's URL. We read only what any visitor's browser can see and tell you, in plain English, what's exposed and what's hurting your search ranking, with fix prompts you can paste straight back into your AI tool.</p>
-<form class="card cta" method=post action=/scan>
+<form id=check class="card cta" method=post action=/scan>
 <input type=url name=url required placeholder="https://myapp.lovable.app" aria-label="Your app URL">
 <label class=own><input type=checkbox name=owner value=1 required> I own this app or am allowed to test it</label>
 <button>Check my app free</button></form>
@@ -59,10 +59,10 @@ def pricing():
     p = config.PLANS
     return page("Pricing", f"""<h1>Pricing</h1><p class=sub>Your first check is free. Weekly monitoring re-checks your app every week and emails you only what changed.</p>
 <div class=grid style='grid-template-columns:1fr 1fr 1fr'>
-<div><b>Free</b><div class=price>$0</div>One check per app after ownership verification.</div>
-<div><b>{p['solo']['name']}</b><div class=price>${p['solo']['price']}<small>/mo</small></div>Weekly monitoring for 1 app, alerts on new issues, fix prompts.</div>
-<div><b>{p['pro']['name']}</b><div class=price>${p['pro']['price']}<small>/mo</small></div>Weekly monitoring for up to 5 apps.</div></div>
-<p><small>Start a free check from the home page, then upgrade from your site page.</small></p>""")
+<div><b>Free</b><div class=price>$0</div>One full scan of your app, with the issue list.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#3b82f6;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Start a free check</a></div>
+<div><b>{p['solo']['name']}</b><div class=price>${p['solo']['price']}<small>/mo</small></div>Weekly monitoring for 1 app, alerts on new issues, fix prompts.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#3b82f6;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Get Solo</a></div>
+<div><b>{p['pro']['name']}</b><div class=price>${p['pro']['price']}<small>/mo</small></div>Weekly monitoring for up to 5 apps.<br><a href='/#check' style='display:inline-block;margin-top:14px;background:#3b82f6;color:#fff;padding:11px 18px;border-radius:8px;text-decoration:none'>Get Pro</a></div></div>
+<p><small>Plans start from a free check of your app: scan it, confirm you own it, then choose Solo or Pro on your site page.</small></p>""")
 def message(title, text, code=None):
     return page(title, f"<h1>{E(title)}</h1><p class=sub>{text}</p><a href=/>Back to start</a>")
 def site_page(site, account, scans, ins, verify_error=None, weekly_count=0):
@@ -74,7 +74,8 @@ def site_page(site, account, scans, ins, verify_error=None, weekly_count=0):
 <p>Option A: put this tag inside the &lt;head&gt; of your home page:</p><div class=code>{E(ins['meta'])}</div>
 <p>Option B: serve a file at <b>{E(ins['file_path'])}</b> containing only:</p><div class=code>{E(ins['file_body'])}</div>
 <p><small>Tip for Lovable/Bolt/Cursor: paste “Add this exact meta tag to the head of index.html: {E(ins['meta'])}” into your AI tool.</small></p>{err}
-<form method=post action=/site/{k}/verify><button>Verify and run my free check</button></form></div>""")
+<form method=post action=/site/{k}/verify><button>Verify and run my free check</button></form>
+<p><small>Once verified, you can start weekly monitoring here: Solo $19/mo (1 app) or Pro $49/mo (up to 5 apps).</small></p></div>""")
     else:
         out.append(f"<div class=card><span class=ok>✔ Ownership verified</span> &nbsp; Plan: <b>{E(account['plan'].title())}</b> &nbsp; Weekly monitoring: <b>{'on' if site['weekly'] else 'off'}</b>"
                    f"<form method=post action=/site/{k}/scan style='margin-top:14px'><button>Run a new check</button></form></div>")

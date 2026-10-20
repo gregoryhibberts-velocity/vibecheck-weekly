@@ -1,7 +1,7 @@
 import os
 def env(k, d=None): return os.environ.get(k, d)
 APP_NAME = env("APP_NAME", "VibeCheck Weekly")
-BASE_URL = env("BASE_URL", "http://localhost:3000").rstrip("/")
+BASE_URL = env("BASE_URL", "https://vibecheck.itsvelocitygroup.com").rstrip("/")
 DATABASE_URL = env("DATABASE_URL") or env("POSTGRES_URL")   # Vercel Postgres/Neon/Supabase all provide one
 SQLITE_PATH = env("SQLITE_PATH", "/tmp/appcheck-dev.db")       # local dev fallback only
 ALLOW_PRIVATE_TARGETS = env("ALLOW_PRIVATE_TARGETS") == "1"    # local tests only; never set in production

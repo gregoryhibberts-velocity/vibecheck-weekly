@@ -104,7 +104,7 @@ class handler(BaseHTTPRequestHandler):
         if path == "/api/cron/nudges":
             if not config.CRON_SECRET or self.headers.get("Authorization") != f"Bearer {config.CRON_SECRET}": return self._json(401, {"error": "unauthorized"})
             qs = urllib.parse.parse_qs(p.query); t = qs.get("test", [""])[0]
-            if t: return self._json(200, {"test": nudges.send_tests(t)})
+            if t: return self._json(200, {"test": nudges.send_tests(t, qs.get("report", [""])[0])})
             if qs.get("only", [""])[0] == "audience": return self._json(200, {"audience_added": nudges.sync_audience()})
             return self._json(200, nudges.run())
         if path == "/unsubscribe":
@@ -117,6 +117,8 @@ class handler(BaseHTTPRequestHandler):
             s = self._site(m.group(1))
             if not s: return self._send(404, views.message("Not found", "That site link is not valid."))
             return self._render_site(s)
+        m = re.fullmatch(r"/r/([\w-]+)/monitor", path)
+        if m: return self._report_action(m.group(1), "monitor")
         m = re.fullmatch(r"/(?:r|report)/([\w-]+)", path)
         if m:
             sc = db.one("SELECT * FROM scans WHERE token=?", (m.group(1),))
@@ -190,7 +192,7 @@ class handler(BaseHTTPRequestHandler):
     def _report_action(self, tok, action):
         sc = db.one("SELECT * FROM scans WHERE token=?", (tok,))
         if not sc: return self._send(404, views.message("Not found", "Report not found."))
-        f = self._form()
+        f = self._form() if self.command == "POST" else {}
         if action == "email":
             email = (f.get("email") or "").strip().lower()
             if not EMAIL_RE.match(email): return self._send(400, views.message("Check your email", "Please enter a valid email address."))
@@ -232,4 +234,13 @@ class handler(BaseHTTPRequestHandler):
         mailer.send(email, f"Verify {host} for your {config.APP_NAME} check",
                     f"<p>Your private link for {host}: <a href='{config.BASE_URL}/site/{s['manage_key']}'>{config.BASE_URL}/site/{s['manage_key']}</a></p>")
         return self._redirect(f"/site/{s['manage_key']}")
+    def do_HEAD(self):
+        real = self.wfile
+        class _Null:
+            def write(self, b): pass
+        orig = self.end_headers
+        def eh(): orig(); self.wfile = _Null()
+        self.end_headers = eh
+        try: self.do_GET()
+        finally: self.wfile = real
     def log_message(self, *a): pass

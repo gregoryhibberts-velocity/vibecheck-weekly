@@ -43,7 +43,7 @@ def build(kind, email, host, report_url):
         paras = ["Hello,",
                  f"Apps built with AI tools change quickly, and a new release can reopen a security or Google-visibility issue without anyone noticing.",
                  f"The Solo plan rescans {host} every week for $19 a month and emails you a full report each time, including anything new since the last check. You can cancel at any time."]
-        return subj, *_wrap(paras, ("Start weekly checks", f"{config.BASE_URL}/pricing"), email)
+        return subj, *_wrap(paras, ("Start weekly checks", report_url + "/monitor"), email)
 
 def _candidates():
     return db.all("""SELECT a.email, a.created_at, s.token, s.url FROM accounts a
@@ -80,10 +80,14 @@ def run(limit=100):
         if len(out["sent"]) >= limit: break
     return out
 
-def send_tests(to):
-    """Send one of each nudge to `to` with sample data. Does not touch send tracking."""
-    res = {}
+def send_tests(to, token=""):
+    """Send one of each nudge to `to`, using a real report token if given. Does not touch send tracking."""
+    sc = db.one("SELECT token, url FROM scans WHERE token=?", (token,)) if token else None
+    if not sc: sc = db.one("SELECT token, url FROM scans WHERE email=? ORDER BY id DESC LIMIT 1", (to.lower(),))
+    if not sc: return {"error": "no report found"}
+    host = urllib.parse.urlparse(sc["url"] or "").hostname or "your app"
+    res = {"report": f"{config.BASE_URL}/r/{sc['token']}"}
     for kind in ("unlock", "plan"):
-        subj, h, t, hd = build(kind, to, "example-app.lovable.app", f"{config.BASE_URL}/pricing")
+        subj, h, t, hd = build(kind, to, host, f"{config.BASE_URL}/r/{sc['token']}")
         res[kind] = mailer.send(to, "[TEST] " + subj, h, t, hd)
     return res
