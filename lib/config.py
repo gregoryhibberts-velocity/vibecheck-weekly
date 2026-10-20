@@ -17,6 +17,7 @@ EMAIL_PROVIDER = env("EMAIL_PROVIDER", "log")   # resend | postmark | log
 EMAIL_API_KEY = env("EMAIL_API_KEY")
 EMAIL_FROM = env("EMAIL_FROM", "VibeCheck Weekly <reports@example.com>")
 EMAIL_API_BASE = env("EMAIL_API_BASE")          # override for mocks
+SUPPORT_EMAIL = env("SUPPORT_EMAIL", "vibecheckweekly@mail.grokbot.com")  # public support inbox; also the Reply-To on outgoing email
 RL_SCANS_PER_IP_HOUR = int(env("RL_SCANS_PER_IP_HOUR", "10"))
 RL_FREE_SCANS_PER_IP_DAY = int(env("RL_FREE_SCANS_PER_IP_DAY", "10"))
 RL_SCANS_PER_EMAIL_DAY = int(env("RL_SCANS_PER_EMAIL_DAY", "5"))
