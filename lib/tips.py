@@ -3,7 +3,7 @@ import json, os, datetime
 from email.utils import format_datetime
 from . import config
 from .views import page, E
-from .guides import CTA
+from .guides import cta
 PATH = os.path.join(os.path.dirname(__file__), "tips.json")
 SCAN_LINE = "Run a free scan to see what your site exposes"
 def _today():
@@ -24,11 +24,11 @@ def html_body(t): return "".join(f"<p>{E(p)}</p>" for p in t["body"]) + f"<p>{E(
 def render(slug):
     t = get(slug)
     if not t: return None
-    return page(f"{t['title']} | {config.APP_NAME}", f"<small class=eyebrow>TIP · {E(t['date'])}</small><h1>{E(t['title'])}</h1>{html_body(t)}{CTA}",
+    return page(f"{t['title']} | {config.APP_NAME}", f"<small class=eyebrow>TIP · {E(t['date'])}</small><h1>{E(t['title'])}</h1>{html_body(t)}{cta("tip")}",
                 f"<link rel=alternate type=application/rss+xml title='{E(config.APP_NAME)} tips' href=/tips/rss.xml>", desc=t["body"][0][:155])
 def index():
     items = "".join(f"<div class=card><small>{E(t['date'])}</small><h2 style='margin-top:4px'><a href=/tips/{t['slug']}>{E(t['title'])}</a></h2><p>{E(t['body'][0])}</p></div>" for t in published())
-    return page(f"Tips | {config.APP_NAME}", f"<h1>Daily tips</h1><p class=sub>One short security or Google-visibility tip for apps built with AI tools. <a href=/tips/rss.xml>RSS feed</a></p>{items or '<p>No tips yet.</p>'}{CTA}",
+    return page(f"Tips | {config.APP_NAME}", f"<h1>Daily tips</h1><p class=sub>One short security or Google-visibility tip for apps built with AI tools. <a href=/tips/rss.xml>RSS feed</a></p>{items or '<p>No tips yet.</p>'}{cta("tips-index")}",
                 f"<link rel=alternate type=application/rss+xml title='{E(config.APP_NAME)} tips' href=/tips/rss.xml>", desc="Short daily security and Google-visibility tips for apps built with Lovable, Bolt, Replit, v0 and Cursor.")
 def _rfc822(d): return format_datetime(datetime.datetime.fromisoformat(d + "T11:00:00+00:00"))
 def rss():

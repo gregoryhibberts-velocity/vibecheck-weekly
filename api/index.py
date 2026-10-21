@@ -6,12 +6,13 @@ from lib import config, db, scanner, verify, ratelimit, crm, mailer, billing, vi
 
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$")
 
-def run_scan(site=None, url=None, email=None, unlocked=0):
+def run_scan(site=None, url=None, email=None, unlocked=0, src=None):
     url = url or site["url"]
     if site and email is None:
         acc = db.one("SELECT * FROM accounts WHERE id=?", (site["account_id"],))
         email, unlocked = acc["email"], int(acc["plan"] != "free")
     r = scanner.scan(url)
+    if src: r["src"] = src  # which form started the scan (for A/B tests)
     tok = secrets.token_urlsafe(12)
     db.insert("INSERT INTO scans(token, site_id, url, email, unlocked, status, score, result, created_at) VALUES(?,?,?,?,?,?,?,?,?)",
               (tok, site["id"] if site else None, url, email, unlocked, "done", r["score"], json.dumps(r), db.now()))
@@ -197,7 +198,8 @@ class handler(BaseHTTPRequestHandler):
         if not scanner.is_public_host(u.hostname): return self._send(400, views.message("Not allowed", "Private or internal addresses can't be checked."))
         if not ratelimit.hit("free-ip:" + self._ip(), config.RL_FREE_SCANS_PER_IP_DAY, 86400) or not ratelimit.hit("free-host:" + u.hostname.lower(), 20, 86400):
             return self._send(429, views.message("Slow down", "You've reached today's free check limit. Please try again tomorrow."))
-        sc = run_scan(url=f"{u.scheme}://{u.netloc}{u.path or '/'}")
+        src = re.sub(r"[^a-z0-9-]", "", (f.get("src") or "").lower())[:30] or None
+        sc = run_scan(url=f"{u.scheme}://{u.netloc}{u.path or '/'}", src=src)
         return self._redirect(f"/r/{sc['token']}")
 
     def _report_action(self, tok, action):

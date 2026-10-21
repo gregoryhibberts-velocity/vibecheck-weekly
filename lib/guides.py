@@ -4,8 +4,9 @@ from .views import page, E
 
 CTA = """<div class="card cta2"><h2>Check your app in about 30 seconds</h2>
 <p class=sub>Paste your live URL. The free check reads only what any visitor's browser can see and lists what is exposed and what is holding back your search visibility.</p>
-<form method=post action=/scan><input type=url name=url required placeholder="https://myapp.lovable.app" aria-label="Your app URL">
+<form method=post action=/scan><input type=hidden name=src value="{src}"><input type=url name=url required placeholder="https://myapp.lovable.app" aria-label="Your app URL">
 <label class=own><input type=checkbox name=owner value=1 required> I own this app or am allowed to test it</label><button>Check my app free</button></form></div>"""
+def cta(src): return CTA.replace("{src}", src)
 
 GUIDES = {
 "is-my-lovable-app-secure": dict(
@@ -68,7 +69,7 @@ GUIDES = {
 "api-key-exposed-in-frontend": dict(
  title="Is my API key exposed in my AI-built app? How to check and fix it",
  desc="How to tell if an OpenAI, Stripe or Supabase service_role key is visible in the frontend of an app built with Lovable, Bolt, Replit, v0 or Cursor, and what to do if it is.",
- body=CTA + """<p class=sub>AI app builders often wire up an API by pasting the key right into the code. If that code runs in the browser, anyone who visits your site can find the key and use it on your bill. Here is how to check in a few minutes and how to fix it.</p>
+ body="""<p class=sub>AI app builders often wire up an API by pasting the key right into the code. If that code runs in the browser, anyone who visits your site can find the key and use it on your bill. Here is how to check in a few minutes and how to fix it.</p>
 <h2>1. Know which keys can be public</h2>
 <p>Some keys are made to be seen. The Supabase project URL and <b>anon</b> key, a Stripe <b>publishable</b> key (pk_live_) and a Firebase web config are all fine in the browser. Your database rules and server settings decide what they can do.</p>
 <p>Other keys must stay secret. These include the Supabase <b>service_role</b> key, Stripe secret keys (sk_live_), and keys for OpenAI (sk-), Anthropic (sk-ant-), Resend, SendGrid and similar services. If one of these reaches the browser, treat it as leaked.</p>
@@ -81,7 +82,7 @@ GUIDES = {
 <h2>5. If you find a secret key, fix it in this order</h2>
 <ol>
 <li><b>Rotate the key first.</b> Create a new key at the provider and delete the old one. Removing it from your code does not help if someone already copied it.</li>
-<li><b>Move the call to the server.</b> Put the request in a server-side function, such as a Supabase Edge Function, a Next.js API route or a Replit backend, and store the key as a server secret.</li>
+<li><b>Move the call to the server.</b> Put the request in a server-side function, such as a Supabase Edge Function, a Next.js API route or a Replit backend, and store the key as a server secret. Our guide on <a href=/guides/hide-api-keys-in-ai-built-apps>how to hide API keys in a Lovable, Bolt, v0 or Cursor app</a> shows how, step by step.</li>
 <li><b>Check your usage and billing.</b> Look for charges or requests you don't recognize, and set a spending limit where the provider allows it.</li>
 </ol>
 <h2>A prompt you can give your AI builder</h2>
@@ -128,16 +129,19 @@ GUIDES = {
 <li><b>Store the new key only on the server</b>, using the steps above.</li>
 </ol>
 <h2>Checking your live app</h2>
-<p>Open your published site, open the browser developer tools and search the loaded scripts for <code>sk_live_</code>, <code>sk-</code>, <code>sk-ant-</code> and <code>service_role</code>. The free check below runs the same kind of search across your page and its script files for common secret key formats, and tells you which keys it found and how to fix them. It cannot see keys that only exist on your server, which is exactly where they should be.</p>"""),
+<p>Open your published site, open the browser developer tools and search the loaded scripts for <code>sk_live_</code>, <code>sk-</code>, <code>sk-ant-</code> and <code>service_role</code>. The free check below runs the same kind of search across your page and its script files for common secret key formats, and tells you which keys it found and how to fix them. It cannot see keys that only exist on your server, which is exactly where they should be.</p>
+<p>Not sure if a key has already leaked? Read <a href=/guides/api-key-exposed-in-frontend>Is my API key exposed in my AI-built app?</a> to check your live site and learn what to do first if it has.</p>"""),
 }
 
 def render(slug):
     g = GUIDES[slug]
-    return page(f"{g['title']} | {config.APP_NAME}", f"<small class=eyebrow>GUIDE</small><h1>{E(g['title'])}</h1>{g['body']}{CTA}", desc=g["desc"])
+    body = g['body']; i = body.find('</p>') + 4  # test 2026-10-21: scan box right after the intro, plus the one at the end
+    body = body[:i] + cta('guide-top') + body[i:]
+    return page(f"{g['title']} | {config.APP_NAME}", f"<small class=eyebrow>GUIDE</small><h1>{E(g['title'])}</h1>{body}{cta('guide-bottom')}", desc=g["desc"])
 
 def index():
     items = "".join(f"<div class=card><h2 style='margin-top:0'><a href=/guides/{s}>{E(g['title'])}</a></h2><p>{E(g['desc'])}</p></div>" for s, g in GUIDES.items())
-    return page(f"Guides | {config.APP_NAME}", f"<h1>Guides</h1><p class=sub>Practical security and search checks for apps built with AI tools.</p>{items}{CTA}", desc="Practical security and Google-visibility guides for apps built with Lovable, Bolt, Replit, v0 and Cursor.")
+    return page(f"Guides | {config.APP_NAME}", f"<h1>Guides</h1><p class=sub>Practical security and search checks for apps built with AI tools.</p>{items}{cta('guides-index')}", desc="Practical security and Google-visibility guides for apps built with Lovable, Bolt, Replit, v0 and Cursor.")
 
 def llms_txt():
     """Plain-text summary for AI assistants (llmstxt.org format)."""
