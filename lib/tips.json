@@ -10,5 +10,17 @@
       "Some keys are meant to be public. A Supabase anon key is normal, for example, but it is only safe if Row Level Security is turned on for every table. A Supabase service_role key is different: it bypasses all of your database rules and should never reach the browser.",
       "The fix is to move secret keys into server-side environment variables, such as an Edge Function or API route, and have the browser call that. If a key has already been exposed, revoke it and create a new one."
     ]
+  },
+  {
+    "slug": "check-what-google-sees-on-your-app",
+    "date": "2026-10-21",
+    "status": "published",
+    "subject": "Can Google actually read your app's pages?",
+    "title": "Check what Google sees when it opens your app",
+    "body": [
+      "Many apps built with AI tools are single-page apps: the server sends a nearly empty HTML file, and JavaScript fills in the content in the browser. Google can run JavaScript, but rendering can be delayed, and pages that all share one generic title and description are hard to tell apart in search results.",
+      "A quick check: open your site, right-click and choose View Page Source. If your page title, description and main text are missing from that raw HTML, search engines and link previews have less to work with.",
+      "To fix it, give each page its own title and meta description, add a sitemap.xml, and make sure robots.txt is not blocking pages you want found. For your most important pages, consider pre-rendering or server-side rendering."
+    ]
   }
 ]
