@@ -99,7 +99,10 @@ def pricing():
 <div><b>{p['solo']['name']}</b><div class=price>${p['solo']['price']}<small>/mo</small></div><p class=pdesc>Weekly monitoring for 1 app, alerts on new issues, fix prompts.</p><div class=foot><a class=pbtn href='/#check'>Start free, then get Solo</a></div></div>
 <div><b>{p['pro']['name']}</b><div class=price>${p['pro']['price']}<small>/mo</small></div><p class=pdesc>Weekly monitoring for up to 5 apps.</p><div class=foot><a class=pbtn href='/#check'>Start free, then get Pro</a></div></div></div>
 <p style='text-align:center'><small style='color:#5b6474'>+ sales tax where applicable</small></p>
-<p><small>Plans start from a free check of your app: scan it, confirm you own it, then choose Solo or Pro on your site page.</small></p>""")
+<p><small>Plans start from a free check of your app: scan it, confirm you own it, then choose Solo or Pro on your site page.</small></p>
+<div class="card cta2"><h2>Start with the free check</h2><p class=sub>Paste your live URL and see your score and the list of issues in about 30 seconds. You only pay if you want the fixes or weekly monitoring.</p>
+<form method=post action=/scan><input type=hidden name=src value="pricing"><input type=url name=url required placeholder="https://myapp.lovable.app" aria-label="Your app URL">
+<label class=own><input type=checkbox name=owner value=1 required> I own this app or am allowed to test it</label><button>Check my app free</button></form></div>""", desc="VibeCheck Weekly pricing: a free security and Google-visibility check, a $9 one-time full report with fixes, or weekly monitoring at $19/month for 1 app or $49/month for up to 5 apps.")
 def message(title, text, code=None):
     return page(title, f"<h1>{E(title)}</h1><p class=sub>{text}</p><a href=/>Back to start</a>")
 def site_page(site, account, scans, ins, verify_error=None, weekly_count=0):

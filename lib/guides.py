@@ -10,6 +10,8 @@ def cta(src): return CTA.replace("{src}", src)
 
 GUIDES = {
 "is-my-lovable-app-secure": dict(
+ q="How do I check if my Lovable app is secure?",
+ answer="Check four things on your live app: no secret keys (such as the Supabase service_role key or an OpenAI key) in the JavaScript the browser loads, Row Level Security turned on for every Supabase table, private pages that refuse to load when you are logged out, and basic security headers. Repeat the check after big changes, because each new prompt can change your code.",
  title="Is my Lovable app secure? A practical checklist",
  desc="How to check a Lovable app for exposed keys, Supabase Row Level Security gaps and missing security headers before real users arrive.",
  body="""<p class=sub>Lovable gets an app from idea to live link quickly. Security is still your responsibility once real people sign up. These are the checks worth doing before you share the link widely.</p>
@@ -28,6 +30,8 @@ GUIDES = {
 <h2>What an outside scan can and cannot tell you</h2>
 <p>A scan of your live site can find keys in public code, missing headers and visibility problems. It cannot see your database rules directly, so RLS should also be reviewed inside Supabase.</p>"""),
 "supabase-rls-checklist": dict(
+ q="How do I set up Supabase Row Level Security correctly?",
+ answer="Turn on Row Level Security for every table in the public schema, give each table separate select, insert, update and delete policies that compare the owner column with auth.uid(), use WITH CHECK on insert and update, keep the service_role key off the browser, and test by trying to read one account's data while signed in as a second account.",
  title="Supabase RLS checklist for AI-built apps",
  desc="A step-by-step Supabase Row Level Security checklist for apps built with Lovable, Bolt, Cursor or v0: enabling RLS, writing policies and testing them.",
  body="""<p class=sub>Most AI app builders connect to Supabase and call the database straight from the browser using the public anon key. That setup is safe only if Row Level Security (RLS) is on and the policies are correct.</p>
@@ -49,6 +53,8 @@ GUIDES = {
 <h2>Where a live scan helps</h2>
 <p>A scan of your live site cannot read your RLS policies, but it can confirm your app uses Supabase, check that no service_role key is exposed, and flag the other issues that tend to appear alongside RLS gaps.</p>"""),
 "why-google-cant-find-your-ai-built-app": dict(
+ q="Why can't Google find my AI-built app?",
+ answer="The usual causes are a leftover noindex tag, a robots.txt that blocks crawlers, no sitemap, the same title and description on every page, and pages that are empty until JavaScript runs. Fix those, then add the site to Google Search Console, submit the sitemap and request indexing for the home page.",
  title="Why Google can't find your AI-built app",
  desc="Common reasons apps built with Lovable, Bolt, Replit or v0 don't show up in Google: noindex tags, missing titles, no sitemap and pages that are empty without JavaScript.",
  body="""<p class=sub>Your app is live and the link works, but searching for it on Google shows nothing. These are the most common causes for apps built with AI tools, and each one can usually be fixed in a single prompt.</p>
@@ -67,6 +73,8 @@ GUIDES = {
 <h2>7. The site is too new or has no links</h2>
 <p>Even a well-built site takes time to be crawled. Register it in Google Search Console, submit the sitemap and request indexing for the home page.</p>"""),
 "api-key-exposed-in-frontend": dict(
+ q="How do I check if my API key is exposed in my app's frontend?",
+ answer="Open your live site, open the browser developer tools and search the loaded scripts for sk_live_, sk-, sk-ant- and service_role. Any secret key you find there, or stored in a variable starting with VITE_, NEXT_PUBLIC_ or REACT_APP_, is public. Rotate it at the provider first, then move the call that uses it into a server-side function.",
  title="Is my API key exposed in my AI-built app? How to check and fix it",
  desc="How to tell if an OpenAI, Stripe or Supabase service_role key is visible in the frontend of an app built with Lovable, Bolt, Replit, v0 or Cursor, and what to do if it is.",
  body="""<p class=sub>AI app builders often wire up an API by pasting the key right into the code. If that code runs in the browser, anyone who visits your site can find the key and use it on your bill. Here is how to check in a few minutes and how to fix it.</p>
@@ -90,6 +98,8 @@ GUIDES = {
 <h2>Keep checking after changes</h2>
 <p>A new prompt can add a key back into the frontend without you noticing. Checking the live site after each big update catches this early. See also <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a> and the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>.</p>"""),
 "hide-api-keys-in-ai-built-apps": dict(
+ q="How do I hide API keys in a Lovable, Bolt, v0 or Cursor app?",
+ answer="Keep only public keys in the browser, such as the Supabase anon key or a Stripe publishable key. Move every secret key (OpenAI, Stripe secret, Supabase service_role) into a server-side function that reads it from a secret or environment variable, have the frontend call that function, and require a signed-in user before it does any paid work.",
  title="How to hide API keys in a Lovable, Bolt, v0 or Cursor app",
  desc="Which API keys are safe in the browser, which are not, and how to move secret keys for OpenAI, Stripe and Supabase into server-side functions in apps built with AI tools.",
  body="""<p class=sub>AI app builders make it easy to connect OpenAI, Stripe or Supabase in a few prompts. The quickest way to get that working is often to put the key straight into frontend code, which means anyone who opens your site can copy it. This guide explains which keys are safe to ship, how to move the rest to the server, and what to do if a key has already been exposed.</p>
@@ -133,11 +143,33 @@ GUIDES = {
 <p>Not sure if a key has already leaked? Read <a href=/guides/api-key-exposed-in-frontend>Is my API key exposed in my AI-built app?</a> to check your live site and learn what to do first if it has.</p>"""),
 }
 
+def head(slug, g):
+    """Canonical, social preview tags and structured data so search engines and AI assistants can cite the guide."""
+    import json
+    b = config.BASE_URL; url = f"{b}/guides/{slug}"
+    ld = lambda o: "<script type='application/ld+json'>" + json.dumps(o).replace("<", "\\u003c") + "</script>"
+    art = {"@context": "https://schema.org", "@type": "TechArticle", "headline": g["title"], "description": g["desc"], "url": url,
+           "mainEntityOfPage": url, "inLanguage": "en", "dateModified": g.get("updated", "2026-10-21"),
+           "author": {"@type": "Organization", "name": config.APP_NAME, "url": b + "/"},
+           "publisher": {"@type": "Organization", "name": config.APP_NAME, "url": b + "/"}}
+    crumbs = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": config.APP_NAME, "item": b + "/"},
+        {"@type": "ListItem", "position": 2, "name": "Guides", "item": b + "/guides"},
+        {"@type": "ListItem", "position": 3, "name": g["title"], "item": url}]}
+    out = (f"<link rel=canonical href='{url}'><meta property='og:type' content='article'><meta property='og:url' content='{url}'>"
+           f"<meta property='og:title' content='{E(g['title'])}'><meta property='og:description' content='{E(g['desc'])}'>"
+           f"<meta name='twitter:card' content='summary'><meta name='twitter:site' content='@VibeCheck_Wkly'>" + ld(art) + ld(crumbs))
+    if g.get("answer"):
+        out += ld({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": g.get("q") or g["title"],
+                   "acceptedAnswer": {"@type": "Answer", "text": g["answer"]}}]})
+    return out
+
 def render(slug):
     g = GUIDES[slug]
     body = g['body']; i = body.find('</p>') + 4  # test 2026-10-21: scan box right after the intro, plus the one at the end
-    body = body[:i] + cta('guide-top') + body[i:]
-    return page(f"{g['title']} | {config.APP_NAME}", f"<small class=eyebrow>GUIDE</small><h1>{E(g['title'])}</h1>{body}{cta('guide-bottom')}", desc=g["desc"])
+    short = f"<div class='card short'><b>Short answer</b><p style='margin:.4em 0 0'>{E(g['answer'])}</p></div>" if g.get("answer") else ""
+    body = body[:i] + short + cta('guide-top') + body[i:]
+    return page(f"{g['title']} | {config.APP_NAME}", f"<small class=eyebrow>GUIDE</small><h1>{E(g['title'])}</h1>{body}{cta('guide-bottom')}", extra_head=head(slug, g), desc=g["desc"])
 
 def index():
     items = "".join(f"<div class=card><h2 style='margin-top:0'><a href=/guides/{s}>{E(g['title'])}</a></h2><p>{E(g['desc'])}</p></div>" for s, g in GUIDES.items())
@@ -154,6 +186,6 @@ def llms_txt():
      "VibeCheck Weekly only reads what a normal visitor's browser can see. It needs no code access, login or install, and it cannot read database rules directly.",
      "Pricing: the free check shows the score and the list of problems; the full report with fixes is $9 one time; weekly monitoring is $19/month for 1 app or $49/month for up to 5 apps (plus sales tax where applicable).", "",
      "## Main pages", f"- [Free scan]({b}/): paste a live URL and get results in about 30 seconds", f"- [Pricing]({b}/pricing): free check, $9 report, weekly plans", "",
-     "## Guides"] + [f"- [{g['title']}]({b}/guides/{s}): {g['desc']}" for s, g in GUIDES.items()] + ["",
+     "## Guides"] + [f"- [{g['title']}]({b}/guides/{s}): {g.get('answer') or g['desc']}" for s, g in GUIDES.items()] + ["",
      "## FAQ"] + [f"- {q} {a}" for q, a in views.FAQ_LD] + ["", "## Optional", f"- [Daily tips]({b}/tips): short security and Google-visibility tips", f"- [Tips RSS]({b}/tips/rss.xml)", ""]
     return "\n".join(lines)
