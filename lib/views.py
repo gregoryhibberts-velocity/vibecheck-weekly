@@ -74,7 +74,7 @@ def landing():
 <h2>What we check</h2>
 <div class=grid><div><b>Leaked secrets</b><br>OpenAI, Anthropic, Stripe, AWS, GitHub keys and Supabase service_role keys in your public code.</div>
 <div><b>Security basics</b><br>HTTPS, redirects and the headers that block common attacks.</div>
-<div><b>Google visibility</b><br>Titles, descriptions, social previews, robots.txt, sitemap and empty single-page apps.</div></div>
+<div><b>Google visibility</b><br>Leftover noindex tags, titles, descriptions, social previews, robots.txt, sitemap and empty single-page apps.</div></div>
 <h2>Pricing</h2>
 <div class=grid><div><b>Free check</b><div class=price>$0</div>Free scan with the list of issues found.</div>
 <div><b>Full report</b><div class=price>$9</div>One-time. Every detail plus fix prompts.</div>

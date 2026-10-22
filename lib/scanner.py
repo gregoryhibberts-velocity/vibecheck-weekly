@@ -151,6 +151,27 @@ def scan(url):
         if label == "robots.txt" and ok and re.search(r"(?im)^disallow:\s*/\s*$", b):
             add("Google visibility", "critical", "robots.txt blocks all crawlers", "Your robots.txt says Disallow: / — Google will not index your site.", "Change my robots.txt so it allows search engines to crawl my public pages.")
 
+    # leftover noindex (meta robots / googlebot, X-Robots-Tag header)
+    ni = []
+    for m in re.finditer(r"<meta\b[^>]*>", page, re.I):
+        t = m.group(0)
+        nm = re.search(r"name\s*=\s*[\"']?\s*(robots|googlebot)\b", t, re.I)
+        ct = re.search(r"content\s*=\s*[\"']([^\"']*)", t, re.I)
+        if nm and ct and re.search(r"\b(noindex|none)\b", ct.group(1), re.I):
+            ni.append(f'<meta name="{nm.group(1).lower()}" content="{ct.group(1).strip()}">')
+    xr = headers.get("x-robots-tag", "")
+    for part in re.split(r",(?=\s*[a-z0-9_-]+\s*:)", xr, flags=re.I) if xr else []:
+        bot = re.match(r"\s*([a-z0-9_-]+)\s*:", part, re.I)
+        if bot and bot.group(1).lower() not in ("googlebot", "all") and not re.match(r"\s*(unavailable_after|max-)", part, re.I): continue
+        if re.search(r"\b(noindex|none)\b", part, re.I): ni.append(f"X-Robots-Tag: {xr.strip()[:100]} (response header)"); break
+        ni.append(f"X-Robots-Tag: {xr.strip()[:100]} (response header)")
+    if ni:
+        add("Google visibility", "critical", "A noindex tag is telling Google not to list this page",
+            "Found: " + "; ".join(ni) + ". Google will drop this page from search results. This is often left over from development.",
+            "My live site tells Google not to index it (" + "; ".join(ni) + "). Remove the noindex robots/googlebot meta tag and any X-Robots-Tag: noindex header from my public pages (check my HTML head, SEO component, framework config and host settings such as vercel.json or _headers). Keep noindex only on private pages like admin or dashboards. Then tell me how to request indexing in Google Search Console.")
+    else:
+        add("Google visibility", "pass", "No noindex tag", "The page does not tell Google to stay away (checked robots/googlebot meta tags and the X-Robots-Tag header).")
+
     # speed
     sev = "pass" if secs < 1.0 else "info" if secs < 2.5 else "warning"
     add("Speed", sev, "Server response time", f"Main page downloaded in {secs:.2f}s ({meta['html_kb']} KB of HTML, {len(srcs)} script tags).",
