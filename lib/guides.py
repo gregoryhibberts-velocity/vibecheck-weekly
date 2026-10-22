@@ -28,7 +28,7 @@ GUIDES = {
 <h2>5. Re-check after every big change</h2>
 <p>Each new prompt can change your code. A setting that was fine last week can change after a refactor, so a regular re-check matters more than a single audit.</p>
 <h2>What an outside scan can and cannot tell you</h2>
-<p>A scan of your live site can find keys in public code, missing headers and visibility problems. It cannot see your database rules directly, so RLS should also be reviewed inside Supabase.</p>"""),
+<p>A scan of your live site can find keys in public code, missing headers and visibility problems. It cannot see your database rules directly, so RLS should also be reviewed inside Supabase. For how this compares with Lovable's own Quick and Deep scans, see <a href=/guides/lovable-security-scan-vs-outside-scan>Lovable's security scan vs an outside scan</a>.</p>"""),
 "supabase-rls-checklist": dict(
  q="How do I set up Supabase Row Level Security correctly?",
  answer="Turn on Row Level Security for every table in the public schema, give each table separate select, insert, update and delete policies that compare the owner column with auth.uid(), use WITH CHECK on insert and update, keep the service_role key off the browser, and test by trying to read one account's data while signed in as a second account.",
@@ -141,8 +141,40 @@ GUIDES = {
 <h2>Checking your live app</h2>
 <p>Open your published site, open the browser developer tools and search the loaded scripts for <code>sk_live_</code>, <code>sk-</code>, <code>sk-ant-</code> and <code>service_role</code>. The free check below runs the same kind of search across your page and its script files for common secret key formats, and tells you which keys it found and how to fix them. It cannot see keys that only exist on your server, which is exactly where they should be.</p>
 <p>Not sure if a key has already leaked? Read <a href=/guides/api-key-exposed-in-frontend>Is my API key exposed in my AI-built app?</a> to check your live site and learn what to do first if it has.</p>"""),
+"lovable-security-scan-vs-outside-scan": dict(
+ q="Is Lovable's built-in security scan enough?",
+ answer="Lovable's built-in scans read your project from the inside: the Quick scan checks database access rules, npm dependencies and MCP server exposure every time you publish, and the Deep scan, which you run yourself, reviews your code for access-control, injection and secret problems. An outside scan reads the live site the way a visitor does: the JavaScript and headers actually served, HTTPS, robots.txt, sitemap and whether Google can read your pages. Use Lovable's scans before you publish and an outside check of the live URL after, especially if you use a custom domain or care about search traffic.",
+ title="Lovable's security scan vs an outside scan: what each one checks",
+ desc="A plain comparison of Lovable's built-in Quick and Deep security scans and an outside scan of your live app: what each can see, what each misses, and when to use both.",
+ updated="2026-10-22",
+ body="""<p class=sub>Lovable now includes its own security scans, and they are worth running. They look at your project from the inside. An outside scan looks at the published app from the outside, the way any visitor or attacker would. The two answer different questions, so here is what each one covers.</p>
+<h2>What Lovable's built-in scans check</h2>
+<p>According to <a href="https://docs.lovable.dev/features/security" rel=nofollow>Lovable's security documentation</a>, there are two scans:</p>
+<ul>
+<li><b>Quick scan</b> runs automatically when you open the publish dialog. It reviews your database access rules (for example tables without Row Level Security, or rules that let everyone through), checks your npm dependencies for known critical vulnerabilities, and flags an MCP server exposed without sign-in.</li>
+<li><b>Deep scan</b> reviews your application code for access-control mistakes, endpoints anyone can call, unsafe input, secrets in source code, payment logic a customer could change, and weak sign-in or recovery flows. It does not run automatically as you work: you start it from the Security view. Scheduled deep scans are an Enterprise feature.</li>
+</ul>
+<p>Lovable's documentation also says plainly that these tools cannot guarantee complete security and recommends a further review for apps that handle sensitive data.</p>
+<h2>What an outside scan checks</h2>
+<p>An outside scan never sees your code or your database. It loads your live URL and checks what is actually being served:</p>
+<ul>
+<li>Secret keys, such as a Supabase service_role key, inside the JavaScript files the browser downloads</li>
+<li>Security headers on the real responses, HTTPS, and whether plain HTTP redirects to HTTPS</li>
+<li>Google visibility: page title, meta description, social preview tags, robots.txt, sitemap.xml, and whether the page has readable text before JavaScript runs</li>
+</ul>
+<h2>Side by side</h2>
+<table class=cmp><tr><th></th><th>Lovable Quick and Deep scans</th><th>Outside scan of the live site</th></tr>
+<tr><td>Looks at</td><td>Your project code, database rules and dependencies</td><td>The published pages, scripts and headers</td></tr>
+<tr><td>Row Level Security</td><td>Yes, reviews the rules directly</td><td>No, it cannot see database rules</td></tr>
+<tr><td>Keys in shipped JavaScript</td><td>Deep scan looks for secrets in source code</td><td>Yes, searches the files visitors actually download</td></tr>
+<tr><td>Security headers and HTTPS</td><td>Not listed in the scan coverage</td><td>Yes</td></tr>
+<tr><td>Google visibility</td><td>Not a security scan topic</td><td>Yes: titles, descriptions, robots.txt, sitemap, readable HTML</td></tr>
+<tr><td>Custom domains and other hosts</td><td>Lovable projects only</td><td>Any live URL, whatever tool built it</td></tr>
+<tr><td>When it runs</td><td>Quick scan at publish; Deep scan when you start it</td><td>Whenever you run it, or on a weekly schedule</td></tr></table>
+<h2>When to use which</h2>
+<p>Run Lovable's Quick scan and a Deep scan before you publish, and fix what they find. Then check the live URL from the outside, because that is what your users and Google actually receive. Repeat the outside check after big changes, since each new prompt can change what gets shipped. If your app moved off Lovable, or was built with Bolt, Replit, v0 or Cursor, the outside check works the same way.</p>
+<p>For the inside checks in more detail, see <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a> and the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>.</p>"""),
 }
-
 def head(slug, g):
     """Canonical, social preview tags and structured data so search engines and AI assistants can cite the guide."""
     import json
