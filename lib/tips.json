@@ -22,5 +22,17 @@
       "A quick check: open your site, right-click and choose View Page Source. If your page title, description and main text are missing from that raw HTML, search engines and link previews have less to work with.",
       "To fix it, give each page its own title and meta description, add a sitemap.xml, and make sure robots.txt is not blocking pages you want found. For your most important pages, consider pre-rendering or server-side rendering."
     ]
+  },
+  {
+    "slug": "add-basic-security-headers",
+    "date": "2026-10-22",
+    "status": "published",
+    "subject": "Is your site sending the security headers browsers look for?",
+    "title": "Add basic security headers to your app",
+    "body": [
+      "Security headers are short instructions your server sends with every page. They tell the browser how to protect your visitors, and apps built with AI tools often go live without them, because many hosting setups do not add them by default.",
+      "Four worth having: Strict-Transport-Security keeps visitors on HTTPS, X-Content-Type-Options stops browsers from guessing file types, X-Frame-Options or a frame-ancestors rule stops other sites from loading yours in a hidden frame, and a Content-Security-Policy limits which scripts can run.",
+      "Most hosts let you add them in one config file, such as vercel.json, a Netlify _headers file, or your server's middleware. Start the Content-Security-Policy in report-only mode so you can see what it would block before it breaks anything."
+    ]
   }
 ]
