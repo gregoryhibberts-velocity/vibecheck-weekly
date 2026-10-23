@@ -34,5 +34,18 @@
       "Four worth having: Strict-Transport-Security keeps visitors on HTTPS, X-Content-Type-Options stops browsers from guessing file types, X-Frame-Options or a frame-ancestors rule stops other sites from loading yours in a hidden frame, and a Content-Security-Policy limits which scripts can run.",
       "Most hosts let you add them in one config file, such as vercel.json, a Netlify _headers file, or your server's middleware. Start the Content-Security-Policy in report-only mode so you can see what it would block before it breaks anything."
     ]
+  },
+  {
+    "slug": "turn-on-supabase-row-level-security",
+    "date": "2026-10-23",
+    "status": "published",
+    "subject": "Can anyone with your Supabase key read your users' data?",
+    "title": "Turn on Row Level Security for every Supabase table",
+    "guide": "supabase-rls-checklist",
+    "body": [
+      "If your app uses Supabase, its public anon key is built into your frontend code by design. That is only safe when Row Level Security (RLS) is turned on for every table, because RLS is what stops someone holding that key from reading or changing other people's data.",
+      "In the Supabase dashboard, check each table in your public schema. Any table without RLS enabled can be queried directly by anyone who has the key, without going through your app at all.",
+      "Turning RLS on with no policies blocks all access, so add policies next, such as letting signed-in users read and update only rows where user_id matches auth.uid(). Then test it: sign in as a second user and confirm you cannot see the first user's data."
+    ]
   }
 ]
