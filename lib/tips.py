@@ -25,7 +25,7 @@ def html_body(t): return "".join(f"<p>{E(p)}</p>" for p in t["body"]) + f"<p>{E(
 GUIDE_WORDS = [("google", "why-google-cant-find-your-ai-built-app"), ("index", "why-google-cant-find-your-ai-built-app"), ("seo", "why-google-cant-find-your-ai-built-app"),
                ("rls", "supabase-rls-checklist"), ("row level", "supabase-rls-checklist"), ("supabase", "supabase-rls-checklist"),
                ("hide", "hide-api-keys-in-ai-built-apps"), ("key", "api-key-exposed-in-frontend"), ("secret", "api-key-exposed-in-frontend"),
-               ("lovable", "is-my-lovable-app-secure"), ("secure", "is-my-lovable-app-secure")]
+               ("header", "is-my-lovable-app-secure"), ("lovable", "is-my-lovable-app-secure"), ("secure", "is-my-lovable-app-secure")]
 def guide_for(t):
     g = t.get("guide")
     if g in GUIDES: return g
