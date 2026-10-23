@@ -4,7 +4,7 @@ from .views import page, E
 
 CTA = """<div class="card cta2"><h2>Check your app in about 30 seconds</h2>
 <p class=sub>Paste your live URL. The free check reads only what any visitor's browser can see and lists what is exposed and what is holding back your search visibility.</p>
-<form method=post action=/scan><input type=hidden name=src value="{src}"><input type=url name=url required placeholder="https://myapp.lovable.app" aria-label="Your app URL">
+<form method=post action=/scan><input type=hidden name=src value="{src}"><input type=text inputmode=url autocapitalize=off autocorrect=off spellcheck=false name=url required placeholder="myapp.lovable.app or yourdomain.com" aria-label="Your app URL">
 <label class=own><input type=checkbox name=owner value=1 required> I own this app or am allowed to test it</label><button>Check my app free</button></form></div>"""
 def cta(src): return CTA.replace("{src}", src)
 
@@ -172,8 +172,38 @@ GUIDES = {
 <tr><td>Custom domains and other hosts</td><td>Lovable projects only</td><td>Any live URL, whatever tool built it</td></tr>
 <tr><td>When it runs</td><td>Quick scan at publish; Deep scan when you start it</td><td>Whenever you run it, or on a weekly schedule</td></tr></table>
 <h2>When to use which</h2>
-<p>Run Lovable's Quick scan and a Deep scan before you publish, and fix what they find. Then check the live URL from the outside, because that is what your users and Google actually receive. Repeat the outside check after big changes, since each new prompt can change what gets shipped. If your app moved off Lovable, or was built with Bolt, Replit, v0 or Cursor, the outside check works the same way.</p>
+<p>Run Lovable's Quick scan and a Deep scan before you publish, and fix what they find. Then check the live URL from the outside, because that is what your users and Google actually receive. Repeat the outside check after big changes, since each new prompt can change what gets shipped. If your app moved off Lovable, or was built with Bolt, Replit, v0 or Cursor, the outside check works the same way. For Bolt's own built-in checks, see <a href=/guides/is-my-bolt-app-secure>Is my Bolt.new app secure?</a></p>
 <p>For the inside checks in more detail, see <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a> and the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>.</p>"""),
+"is-my-bolt-app-secure": dict(
+ q="How do I check if my Bolt.new app is secure?",
+ answer="Run Bolt's own checks first: the Security Audit page in your database settings (all plans) flags missing Row Level Security and policies that are too open, and Run security audit in the Publish menu (paid plans) reviews your whole project. Then check the live site from the outside: search the JavaScript it serves for secret keys such as sk_live_ or service_role, open private pages while logged out, and confirm security headers, HTTPS, robots.txt and a sitemap are in place.",
+ title="Is my Bolt.new app secure? A pre-launch checklist",
+ desc="How to check an app built with Bolt.new for security problems: what Bolt's database Security Audit and project security audit cover, and the checks to run on your published site.",
+ updated="2026-10-23",
+ body="""<p class=sub>Bolt.new can take an app from a prompt to a published site with a database, sign-in and payments in an afternoon. Bolt now includes its own security checks, and they are the right place to start. This guide explains what each one covers and which checks are still worth running on the live site.</p>
+<h2>1. Run Bolt's database Security Audit (all plans)</h2>
+<p>If your project uses a Bolt Cloud database, open the database icon at the top of the editor and choose <b>Security</b>. According to <a href="https://support.bolt.new/cloud/database/security" rel=nofollow>Bolt's documentation</a>, this page uses the same checks as Supabase's Security Advisor. It flags problems such as tables without Row Level Security, a policy that always returns true, and leaked-password protection being turned off. <b>Ask Bolt to fix</b> sends the findings back to Bolt. It checks the database only, not your code, so open it again after every database change.</p>
+<h2>2. Run the project security audit before you publish (paid plans)</h2>
+<p>In the <b>Publish</b> menu, <b>Run security audit</b> reviews the whole project, code and database together. <a href="https://support.bolt.new/building/security" rel=nofollow>Bolt says</a> it looks at who can see and change data, what error messages and sign-in screens reveal, how sign-in and sign-out work, ways users could change a price or skip a step, unchecked input, and private keys stored in code or sent to the browser. Bolt fixes most issues itself and lists anything you need to change by hand, such as a setting in your email or payment provider. Using this button does not use tokens; asking Bolt to audit the project in chat does.</p>
+<h2>3. Check the live site for secret keys</h2>
+<p>Bolt projects are usually Vite apps, and any environment variable that starts with <code>VITE_</code> is copied into the JavaScript every visitor downloads. Open your published site, open the browser developer tools and search the loaded scripts for <code>sk_live_</code>, <code>sk-</code>, <code>sk-ant-</code> and <code>service_role</code>. The Supabase anon key and a Stripe publishable key (<code>pk_live_</code>) are meant to be public; secret keys are not. If you find one, rotate it at the provider first, then move the call into a server function and store the key in Bolt's Secrets settings. See <a href=/guides/hide-api-keys-in-ai-built-apps>how to hide API keys in a Lovable, Bolt, v0 or Cursor app</a>.</p>
+<h2>4. Test private pages while logged out</h2>
+<p>Open a private browser window and go straight to your dashboard, admin and account URLs, and any URL with a record ID in it. If data loads without signing in, or changing the ID shows someone else's record, the data is not protected on the server. Repeat the test signed in as a second account.</p>
+<h2>5. Check headers, HTTPS and file storage</h2>
+<p>Confirm the site redirects http:// to https:// and sends basic security headers such as Content-Security-Policy, X-Content-Type-Options and a frame policy. In the database settings, check which file storage buckets are public. A bucket marked public can be read by anyone who has a file's link.</p>
+<h2>6. Make sure Google can find it</h2>
+<p>Security is only half of a launch. View your page source and search for "noindex", visit /robots.txt and /sitemap.xml on your real domain, and give each page its own title and description. A Vite app often sends almost no text in its HTML until JavaScript runs, which makes it harder for search engines to read. <a href=/guides/why-google-cant-find-your-ai-built-app>Why Google can't find your AI-built app</a> covers the fixes.</p>
+<h2>Bolt's checks and an outside check, side by side</h2>
+<table class=cmp><tr><th></th><th>Bolt's Security Audit and project audit</th><th>Outside check of the live site</th></tr>
+<tr><td>Looks at</td><td>Your project code and Bolt database</td><td>The published pages, scripts and headers</td></tr>
+<tr><td>Row Level Security and policies</td><td>Yes</td><td>No, it cannot see database rules</td></tr>
+<tr><td>Keys sent to the browser</td><td>Project audit checks code for this</td><td>Yes, searches the files visitors actually download</td></tr>
+<tr><td>Security headers and HTTPS</td><td>Not listed in Bolt's audit coverage</td><td>Yes</td></tr>
+<tr><td>Google visibility</td><td>Not part of the audit</td><td>Yes: noindex, titles, robots.txt, sitemap, readable HTML</td></tr>
+<tr><td>Cost</td><td>Database check on all plans; project audit on paid plans</td><td>Free first check</td></tr></table>
+<h2>A prompt you can give Bolt</h2>
+<p class=prompt>Review this project for security before launch. Make sure Row Level Security is on for every table with separate select, insert, update and delete policies limited to the signed-in user. Move every secret key out of frontend code and out of any VITE_ variable into a server function that reads it from Secrets. Make every dashboard, admin and account page and every server function require a signed-in user, and check on the server that the user owns the record they ask for. List anything I need to change by hand.</p>
+<p>For the Supabase side in more detail, see the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>.</p>"""),
 }
 def head(slug, g):
     """Canonical, social preview tags and structured data so search engines and AI assistants can cite the guide."""

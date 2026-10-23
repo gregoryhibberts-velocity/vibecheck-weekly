@@ -6,13 +6,14 @@ from lib import config, db, scanner, verify, ratelimit, crm, mailer, billing, vi
 
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$")
 
-def run_scan(site=None, url=None, email=None, unlocked=0, src=None):
+def run_scan(site=None, url=None, email=None, unlocked=0, src=None, bare=False):
     url = url or site["url"]
     if site and email is None:
         acc = db.one("SELECT * FROM accounts WHERE id=?", (site["account_id"],))
         email, unlocked = acc["email"], int(acc["plan"] != "free")
     r = scanner.scan(url)
     if src: r["src"] = src  # which form started the scan (for A/B tests)
+    if bare: r["bare"] = 1  # URL typed without http(s):// (test url-box-accepts-bare-domain)
     tok = secrets.token_urlsafe(12)
     db.insert("INSERT INTO scans(token, site_id, url, email, unlocked, status, score, result, created_at) VALUES(?,?,?,?,?,?,?,?,?)",
               (tok, site["id"] if site else None, url, email, unlocked, "done", r["score"], json.dumps(r), db.now()))
@@ -192,7 +193,8 @@ class handler(BaseHTTPRequestHandler):
 
     def _free_scan(self):
         f = self._form(); url = (f.get("url") or "").strip()
-        if url and "://" not in url: url = "https://" + url
+        bare = bool(url) and "://" not in url  # test 2026-10-23 url-box-accepts-bare-domain
+        if bare: url = "https://" + url
         u = urllib.parse.urlparse(url)
         if f.get("owner") != "1" or u.scheme not in ("http", "https") or not u.hostname:
             return self._send(400, views.message("Check your details", "Please enter a valid URL and confirm you own the app."))
@@ -200,7 +202,7 @@ class handler(BaseHTTPRequestHandler):
         if not ratelimit.hit("free-ip:" + self._ip(), config.RL_FREE_SCANS_PER_IP_DAY, 86400) or not ratelimit.hit("free-host:" + u.hostname.lower(), 20, 86400):
             return self._send(429, views.message("Slow down", "You've reached today's free check limit. Please try again tomorrow."))
         src = re.sub(r"[^a-z0-9-]", "", (f.get("src") or "").lower())[:30] or None
-        sc = run_scan(url=f"{u.scheme}://{u.netloc}{u.path or '/'}", src=src)
+        sc = run_scan(url=f"{u.scheme}://{u.netloc}{u.path or '/'}", src=src, bare=bare)
         return self._redirect(f"/r/{sc['token']}")
 
     def _report_action(self, tok, action):
