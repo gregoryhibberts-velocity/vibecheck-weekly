@@ -1,4 +1,4 @@
-import html, json, time
+import html, json, time, urllib.parse
 from . import config
 E = html.escape
 CSS = """html{background:#fff}body{min-height:100vh;font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0;background:#fff linear-gradient(180deg,#eef3ff 0%,#f8fafd 420px,#ffffff 100%) no-repeat;color:#1f2937}
@@ -175,7 +175,10 @@ def report(scan, mode="full"):
                 lockd = " <small>🔒 details and fix prompt in full report</small>" if x["severity"] in ("critical","warning","info") else ""
                 out.append(f"<div class='f {x['severity']}'><span class=tag>{lab}</span><b>{E(x['title'])}</b>{lockd}</div>")
     if mode == "full":
-        out.append(f"<div class=lock><b>Keep it fixed.</b> Apps change every week. <form method=post action=/r/{tok}/monitor style='display:inline;margin-left:10px'><button class=alt>Monitor weekly from $19/mo</button></form></div>")
+        # test 2026-10-24 (full-report-keep-fixed-copy): monitoring upsell names the app and says why fixes come undone
+        host = E(urllib.parse.urlparse(m.get("final_url") or m["url"]).hostname or "your app")
+        out.append(f"""<div class=lock><b>Keep these fixes in place.</b><p>Your next prompt or update can quietly bring an issue back. We re-check <b>{host}</b> every week and email you only when something new appears. Cancel any time.</p>
+<form method=post action=/r/{tok}/monitor style='display:inline'><button class=alt>Monitor {host} weekly – $19/mo</button></form><p><small>Up to 5 apps for $49/mo. + sales tax where applicable.</small></p></div>""")
     out.append("<p><small>This passive check only reads publicly served pages and files. It cannot confirm database rules (RLS) or server-side logic.</small></p>")
     return page("Report", "".join(out))
 def report_email(site, scan, prev_score=None):

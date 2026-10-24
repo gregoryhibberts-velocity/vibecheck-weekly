@@ -203,7 +203,43 @@ GUIDES = {
 <tr><td>Cost</td><td>Database check on all plans; project audit on paid plans</td><td>Free first check</td></tr></table>
 <h2>A prompt you can give Bolt</h2>
 <p class=prompt>Review this project for security before launch. Make sure Row Level Security is on for every table with separate select, insert, update and delete policies limited to the signed-in user. Move every secret key out of frontend code and out of any VITE_ variable into a server function that reads it from Secrets. Make every dashboard, admin and account page and every server function require a signed-in user, and check on the server that the user owns the record they ask for. List anything I need to change by hand.</p>
-<p>For the Supabase side in more detail, see the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>.</p>"""),
+<p>For the Supabase side in more detail, see the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>. Building with Replit instead? See <a href=/guides/is-my-replit-app-secure>Is my Replit app secure?</a></p>"""),
+"is-my-replit-app-secure": dict(
+ q="How do I check if my Replit app is secure?",
+ answer="Start with Replit's Security Center: the free Level 1 scan and automatic dependency scans check your packages for known vulnerabilities, and on paid plans the Level 2 deep scan reviews your code and Level 3 also tests the running Preview. Turn on Block publishing of critical vulnerabilities. Then check the published app from the outside: search the JavaScript it serves for secret keys, open private pages and API routes while logged out, and confirm HTTPS, security headers, robots.txt and a sitemap on your real domain.",
+ title="Is my Replit app secure? What Replit's Security Center checks and what to test yourself",
+ desc="How to check an app built with Replit Agent for security problems: what Replit's scan levels, publish checks and Auto-Protect cover, and the checks to run on your published app.",
+ updated="2026-10-24",
+ body="""<p class=sub>Replit Agent can build and publish a full-stack app, with a server, database and sign-in, from a single prompt. Replit now has several built-in security checks, and they are the right place to start. This guide explains what each one covers, what none of them can promise, and the checks worth running on the live app yourself.</p>
+<h2>1. Know what Replit checks for you</h2>
+<p>According to <a href="https://docs.replit.com/features/security/security-scan-levels" rel=nofollow>Replit's documentation</a>, the Security Center (in the Tools pane) offers three scan levels:</p>
+<ul>
+<li><b>Level 1, basic security checks (free):</b> checks your packages against known vulnerabilities. It does not review your own code.</li>
+<li><b>Level 2, deep security scan (paid plans):</b> adds a Security Agent review of your source code, combining AI review with static analysis tools such as Semgrep. It looks for problems like SQL injection, cross-site scripting and sensitive data written to logs.</li>
+<li><b>Level 3, AI pentest:</b> adds an outside test of your running Preview through the browser and network. It has extra plan and access requirements.</li>
+</ul>
+<p>Replit also scans your dependencies automatically when new vulnerabilities are published, reviews files the Agent changes for hardcoded secrets as you build, and runs a check before every publish. Replit's own docs say a passing publish check does not mean your code has no vulnerabilities, and that no scan guarantees an app is secure.</p>
+<h2>2. Check two settings</h2>
+<p>In the Publishing tool, under Adjust settings, make sure <b>Block publishing of critical vulnerabilities</b> is on. When it is off, a critical finding is only listed and the publish goes ahead. If you want Replit to prepare patches for vulnerable packages, a workspace admin can turn on <b>Auto-Protect</b> in Settings, and you can choose which severity triggers an email. Both Auto-Protect settings are off by default. After applying any fix, republish: the published app keeps running the old version until you do.</p>
+<h2>3. Keep secret keys in Secrets, and out of the browser</h2>
+<p>Store API keys in Replit's <b>Secrets</b> tool and read them only in server code. Secrets sync to the published app when you publish. A key stored in Secrets can still leak if frontend code uses it: in a Vite frontend, any variable starting with <code>VITE_</code> is copied into the JavaScript every visitor downloads. Open your published app, open the browser developer tools and search the loaded scripts for <code>sk_live_</code>, <code>sk-</code>, <code>sk-ant-</code> and <code>service_role</code>. If you find one, rotate it at the provider first, then move the call to your server. Our guide on <a href=/guides/hide-api-keys-in-ai-built-apps>how to hide API keys</a> shows the pattern.</p>
+<h2>4. Test private pages and API routes while logged out</h2>
+<p>Replit apps usually have their own server, such as Express or Flask, so access control lives in your route code. Open a private browser window and go straight to dashboard, admin and account pages, and to API routes like <code>/api/users</code> or any URL with a record ID. If data comes back without signing in, or changing an ID shows another user's record, the route is not checking who is asking. Repeat the test signed in as a second account. Hiding a button in the interface does not protect the route behind it.</p>
+<h2>5. Check the published app, not only the Preview</h2>
+<p>Level 3 tests the running Preview. Your users get the published app, often on a custom domain. Confirm that http:// redirects to https://, that basic security headers such as Content-Security-Policy, X-Content-Type-Options and a frame policy are sent, and that error pages don't show stack traces or file paths. Also check which access option you chose when publishing (Public, Password protected or Invite only) so an internal tool isn't public by accident.</p>
+<h2>6. Make sure Google can find it</h2>
+<p>Security scans don't cover search visibility. Visit /robots.txt and /sitemap.xml on your real domain, give each page its own title and description, and view your page source to make sure your main text is in the HTML. Also check that Google is indexing your custom domain rather than the <code>.replit.app</code> address. <a href=/guides/why-google-cant-find-your-ai-built-app>Why Google can't find your AI-built app</a> covers the fixes.</p>
+<h2>Replit's checks and an outside check, side by side</h2>
+<table class=cmp><tr><th></th><th>Replit Security Center and publish checks</th><th>Outside check of the published app</th></tr>
+<tr><td>Looks at</td><td>Your packages and source code; Level 3 also tests the running Preview</td><td>The published pages, scripts and headers on your real domain</td></tr>
+<tr><td>Vulnerable packages</td><td>Yes, free and automatic</td><td>No</td></tr>
+<tr><td>Code problems such as SQL injection</td><td>Level 2 and 3 (paid plans)</td><td>No, it cannot see your code</td></tr>
+<tr><td>Keys sent to the browser</td><td>Flags hardcoded secrets in code</td><td>Yes, searches the files visitors actually download</td></tr>
+<tr><td>Security headers and HTTPS on your domain</td><td>Not on your published domain (Level 3 tests the Preview)</td><td>Yes</td></tr>
+<tr><td>Google visibility</td><td>Not part of the scans</td><td>Yes: noindex, titles, robots.txt, sitemap, readable HTML</td></tr></table>
+<h2>A prompt you can give Replit Agent</h2>
+<p class=prompt>Review this app for security before I publish. Make sure every secret key is read from Secrets only in server code and never sent to the browser or stored in a VITE_ variable. Make every dashboard, admin and account page and every API route require a signed-in user, and check on the server that the user owns the record they ask for. Add security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy and a frame policy), hide stack traces in production errors, and add a robots.txt and sitemap.xml. List anything I need to change by hand.</p>
+<p>For similar checklists for other builders, see <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a> and <a href=/guides/is-my-bolt-app-secure>Is my Bolt.new app secure?</a></p>"""),
 }
 def head(slug, g):
     """Canonical, social preview tags and structured data so search engines and AI assistants can cite the guide."""
