@@ -47,5 +47,17 @@
       "In the Supabase dashboard, check each table in your public schema. Any table without RLS enabled can be queried directly by anyone who has the key, without going through your app at all.",
       "Turning RLS on with no policies blocks all access, so add policies next, such as letting signed-in users read and update only rows where user_id matches auth.uid(). Then test it: sign in as a second user and confirm you cannot see the first user's data."
     ]
+  },
+  {
+    "slug": "make-sure-env-and-git-files-are-not-public",
+    "date": "2026-10-24",
+    "status": "published",
+    "subject": "Can anyone download your app's .env file?",
+    "title": "Make sure your .env and .git files are not publicly reachable",
+    "body": [
+      "Apps built with AI tools often start in a folder that holds more than the app itself: a .env file with keys and passwords, a .git folder with your full code history, and sometimes backup or database export files. If that whole folder is uploaded to your host, those files can end up downloadable by anyone who guesses the address.",
+      "A quick check: in a private browser window, open your-site.com/.env and your-site.com/.git/config. You should get a 404 or your normal not-found page, not file contents.",
+      "To fix it, deploy only your build output folder (often dist or build), keep .env in .gitignore, and set secrets in your host's environment variable settings instead. If a file was ever reachable, treat every key in it as exposed: revoke it and create a new one."
+    ]
   }
 ]
