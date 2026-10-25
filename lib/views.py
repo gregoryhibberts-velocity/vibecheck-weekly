@@ -18,10 +18,19 @@ button{background:#2563eb;color:#fff;border:0;border-radius:8px;padding:13px 20p
 @media (max-width:640px){nav .links{order:3;flex-basis:100%;gap:22px}nav a{padding:12px 0}nav a.navcta{padding:8px 14px}.plans{grid-template-columns:1fr}.plans>div{grid-row:auto;display:flex;flex-direction:column}.foot{margin-top:6px;align-self:stretch}.pbtn{min-height:44px}.wrap{padding:24px 16px}.grid{grid-template-columns:1fr !important}h1,.hero h1{font-size:32px}.score{font-size:48px}.cta input[name=url],.cta2 input[name=url]{min-width:0;width:100%;flex-basis:100%}.card{padding:18px}form[style*=inline]{display:block !important;margin:10px 0 0 !important}button{max-width:100%;white-space:normal}}"""
 SCAN_JS = '<script>(function(){var s=new URLSearchParams(location.search).get(\'src\');if(!s||!/^[a-z0-9-]{1,30}$/.test(s))return;document.querySelectorAll(\'form[action="/scan"]\').forEach(function(f){if(f.querySelector(\'input[name=src]\'))return;var i=document.createElement(\'input\');i.type=\'hidden\';i.name=\'src\';i.value=s;f.appendChild(i);});})();document.querySelectorAll(\'form[action="/scan"]\').forEach(function(f){var m=document.createElement(\'p\');m.className=\'busy\';m.setAttribute(\'role\',\'status\');m.textContent=\'Checking your app... this takes up to 30 seconds. Please keep this page open.\';f.appendChild(m);f.addEventListener(\'submit\',function(){f.classList.add(\'sending\');var b=f.querySelector(\'button\');if(b){b.disabled=true;b.textContent=\'Checking your app...\';}});});document.querySelectorAll(\'a[data-src]\').forEach(function(a){a.addEventListener(\'click\',function(){var f=document.getElementById(\'check\');if(!f)return;var i=f.querySelector(\'input[name=src]\');if(!i){i=document.createElement(\'input\');i.type=\'hidden\';i.name=\'src\';f.appendChild(i);}i.value=a.getAttribute(\'data-src\');var u=f.querySelector(\'input[name=url]\');if(u)setTimeout(function(){u.focus({preventScroll:true});},350);});});</script>'
 FAVICON_SVG = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='#2563eb'/><path d='M18 33l9 9 19-20' fill='none' stroke='#fff' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/><circle cx='51' cy='13' r='6' fill='#fcd34d'/></svg>"
+OG_IMAGE_ALT = "VibeCheck Weekly: free check for exposed API keys, missing security headers and Google problems in AI-built apps"
+def share_head(title, desc, extra_head=""):
+    """Test 2026-10-24 (social-preview-image): large preview image on every page so shared links show a card, not a bare URL."""
+    b = config.BASE_URL
+    og = "" if "og:title" in extra_head else f"<meta property='og:title' content='{E(title)}'><meta property='og:description' content='{E(desc)}'>"
+    return (og + f"<meta property='og:site_name' content='{E(config.APP_NAME)}'><meta property='og:image' content='{b}/og.png'><meta property='og:image:width' content='1200'>"
+            f"<meta property='og:image:height' content='630'><meta property='og:image:alt' content='{E(OG_IMAGE_ALT)}'>"
+            f"<meta name='twitter:card' content='summary_large_image'><meta name='twitter:site' content='@VibeCheck_Wkly'><meta name='twitter:image' content='{b}/og.png'>")
+OG_PNG = open(__import__("os").path.join(__import__("os").path.dirname(__file__), "og.png"), "rb").read()
 DEFAULT_DESC = "Weekly security and Google-visibility check for apps built with Lovable, Bolt, Cursor and Supabase."
 def page(title, body, extra_head="", desc=None):
     return (f"<!doctype html><html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>{E(title)}</title>"
-            f"<meta name=description content='{E(desc or DEFAULT_DESC)}'><link rel=icon type='image/svg+xml' href=/favicon.svg>{extra_head}<style>{CSS}</style></head>"
+            f"<meta name=description content='{E(desc or DEFAULT_DESC)}'><link rel=icon type='image/svg+xml' href=/favicon.svg>{extra_head}{share_head(title, desc or DEFAULT_DESC, extra_head)}<style>{CSS}</style></head>"
             f"<body><div class=wrap><nav><a class=brand href=/><b>{E(config.APP_NAME)}</b></a><span class=links><a href=/pricing>Pricing</a><a href=/guides>Guides</a><a href=/tips>Tips</a></span><a class=navcta href='/?src=nav#check'>Free check</a></nav>{body}<footer><small>Questions or feedback? Email <a href='mailto:{config.SUPPORT_EMAIL}'>{config.SUPPORT_EMAIL}</a>.</small></footer></div>{SCAN_JS}</body></html>")
 FAQ_LD = [
  ("Is the scan safe for my app?", "Yes. It is read-only and passive: VibeCheck loads your public pages and scripts like a normal visitor. No logins, no attacks, no writes and no database probing."),
@@ -47,7 +56,7 @@ def landing_head():
     t = f"{config.APP_NAME}: free security and Google check for AI-built apps"
     return (f"<link rel=canonical href='{b}/'><meta property='og:type' content='website'><meta property='og:url' content='{b}/'>"
             f"<meta property='og:title' content='{E(t)}'><meta property='og:description' content='{E(LANDING_DESC)}'>"
-            f"<meta name='twitter:card' content='summary'><meta name='twitter:site' content='@VibeCheck_Wkly'>" + ld(app) + ld(faq))
+            + ld(app) + ld(faq))
 LANDING_DESC = "Free 30-second check for apps built with Lovable, Bolt, Replit, v0 or Cursor: finds exposed API keys, Supabase service_role leaks, missing security headers and problems that keep Google from finding your site."
 def landing():
     return page(f"{config.APP_NAME} – Is your AI-built app leaking keys?", """

@@ -97,6 +97,7 @@ class handler(BaseHTTPRequestHandler):
             h = tips.render(path[6:])
             if h: return self._send(200, h)
         if path in ("/favicon.svg", "/favicon.ico"): return self._send(200, views.FAVICON_SVG, "image/svg+xml", {"Cache-Control": "public, max-age=604800"})
+        if path == "/og.png": return self._send(200, views.OG_PNG, "image/png", {"Cache-Control": "public, max-age=604800"})
         if path == "/llms.txt": return self._send(200, guides.llms_txt(), "text/plain; charset=utf-8")
         if path == "/robots.txt": return self._send(200, f"User-agent: *\nAllow: /\nDisallow: /site/\nDisallow: /report/\nDisallow: /r/\nSitemap: {config.BASE_URL}/sitemap.xml\n", "text/plain")
         if path == "/sitemap.xml":
