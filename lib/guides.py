@@ -2,14 +2,15 @@
 from . import config
 from .views import page, E
 
-CTA = """<div class="card cta2"><h2>Check your app in about 30 seconds</h2>
+CTA = """<div class="card cta2"><h2>{h}</h2>
 <p class=sub>Paste your live URL. The free check reads only what any visitor's browser can see and lists what is exposed and what is holding back your search visibility.</p>
 <form method=post action=/scan><input type=hidden name=src value="{src}"><input type=text inputmode=url autocapitalize=off autocorrect=off spellcheck=false name=url required placeholder="myapp.lovable.app or yourdomain.com" aria-label="Your app URL">
 <label class=own><input type=checkbox name=owner value=1 required> I own this app or am allowed to test it</label><button>Check my app free</button></form></div>"""
-def cta(src): return CTA.replace("{src}", src)
+def cta(src, h="Check your app in about 30 seconds"): return CTA.replace("{src}", src).replace("{h}", h)  # test 2026-10-25 guide-bottom-cta-names-builder: guide pages pass a topic-specific heading
 
 GUIDES = {
 "is-my-lovable-app-secure": dict(
+ cta_h="Check your Lovable app for these issues in about 30 seconds",
  q="How do I check if my Lovable app is secure?",
  answer="Check four things on your live app: no secret keys (such as the Supabase service_role key or an OpenAI key) in the JavaScript the browser loads, Row Level Security turned on for every Supabase table, private pages that refuse to load when you are logged out, and basic security headers. Repeat the check after big changes, because each new prompt can change your code.",
  title="Is my Lovable app secure? A practical checklist",
@@ -29,8 +30,9 @@ GUIDES = {
 <p>Each new prompt can change your code. A setting that was fine last week can change after a refactor, so a regular re-check matters more than a single audit.</p>
 <h2>What an outside scan can and cannot tell you</h2>
 <p>A scan of your live site can find keys in public code, missing headers and visibility problems. It cannot see your database rules directly, so RLS should also be reviewed inside Supabase. For how this compares with Lovable's own Quick and Deep scans, see <a href=/guides/lovable-security-scan-vs-outside-scan>Lovable's security scan vs an outside scan</a>.</p>
-<p>For similar checklists for other builders, see <a href=/guides/is-my-bolt-app-secure>Is my Bolt.new app secure?</a> and <a href=/guides/is-my-replit-app-secure>Is my Replit app secure?</a></p>"""),
+<p>For similar checklists for other builders, see <a href=/guides/is-my-bolt-app-secure>Is my Bolt.new app secure?</a>, <a href=/guides/is-my-replit-app-secure>Is my Replit app secure?</a> and <a href=/guides/is-my-v0-app-secure>Is my v0 app secure?</a></p>"""),
 "supabase-rls-checklist": dict(
+ cta_h="Check your Supabase app for exposed keys in about 30 seconds",
  q="How do I set up Supabase Row Level Security correctly?",
  answer="Turn on Row Level Security for every table in the public schema, give each table separate select, insert, update and delete policies that compare the owner column with auth.uid(), use WITH CHECK on insert and update, keep the service_role key off the browser, and test by trying to read one account's data while signed in as a second account.",
  title="Supabase RLS checklist for AI-built apps",
@@ -55,6 +57,7 @@ GUIDES = {
 <p>A scan of your live site cannot read your RLS policies, but it can confirm your app uses Supabase, check that no service_role key is exposed, and flag the other issues that tend to appear alongside RLS gaps.</p>
 <p>Related: <a href=/guides/api-key-exposed-in-frontend>how to check if an API key is exposed in your frontend</a>, and the full <a href=/guides/is-my-lovable-app-secure>Lovable security checklist</a>.</p>"""),
 "why-google-cant-find-your-ai-built-app": dict(
+ cta_h="See what's keeping your app off Google in about 30 seconds",
  q="Why can't Google find my AI-built app?",
  answer="The usual causes are a leftover noindex tag, a robots.txt that blocks crawlers, no sitemap, the same title and description on every page, and pages that are empty until JavaScript runs. Fix those, then add the site to Google Search Console, submit the sitemap and request indexing for the home page.",
  title="Why Google can't find your AI-built app",
@@ -76,6 +79,7 @@ GUIDES = {
 <p>Even a well-built site takes time to be crawled. Register it in Google Search Console, submit the sitemap and request indexing for the home page.</p>
 <p>Security matters too before you share your link. See <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a> or <a href=/guides/is-my-bolt-app-secure>Is my Bolt.new app secure?</a></p>"""),
 "api-key-exposed-in-frontend": dict(
+ cta_h="Check your live app for exposed keys in about 30 seconds",
  q="How do I check if my API key is exposed in my app's frontend?",
  answer="Open your live site, open the browser developer tools and search the loaded scripts for sk_live_, sk-, sk-ant- and service_role. Any secret key you find there, or stored in a variable starting with VITE_, NEXT_PUBLIC_ or REACT_APP_, is public. Rotate it at the provider first, then move the call that uses it into a server-side function.",
  title="Is my API key exposed in my AI-built app? How to check and fix it",
@@ -101,6 +105,7 @@ GUIDES = {
 <h2>Keep checking after changes</h2>
 <p>A new prompt can add a key back into the frontend without you noticing. Checking the live site after each big update catches this early. See also <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a> and the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>.</p>"""),
 "hide-api-keys-in-ai-built-apps": dict(
+ cta_h="Check your live app for exposed keys in about 30 seconds",
  q="How do I hide API keys in a Lovable, Bolt, v0 or Cursor app?",
  answer="Keep only public keys in the browser, such as the Supabase anon key or a Stripe publishable key. Move every secret key (OpenAI, Stripe secret, Supabase service_role) into a server-side function that reads it from a secret or environment variable, have the frontend call that function, and require a signed-in user before it does any paid work.",
  title="How to hide API keys in a Lovable, Bolt, v0 or Cursor app",
@@ -145,6 +150,7 @@ GUIDES = {
 <p>Open your published site, open the browser developer tools and search the loaded scripts for <code>sk_live_</code>, <code>sk-</code>, <code>sk-ant-</code> and <code>service_role</code>. The free check below runs the same kind of search across your page and its script files for common secret key formats, and tells you which keys it found and how to fix them. It cannot see keys that only exist on your server, which is exactly where they should be.</p>
 <p>Not sure if a key has already leaked? Read <a href=/guides/api-key-exposed-in-frontend>Is my API key exposed in my AI-built app?</a> to check your live site and learn what to do first if it has.</p>"""),
 "lovable-security-scan-vs-outside-scan": dict(
+ cta_h="Run the outside check on your Lovable app, free",
  q="Is Lovable's built-in security scan enough?",
  answer="Lovable's built-in scans read your project from the inside: the Quick scan checks database access rules, npm dependencies and MCP server exposure every time you publish, and the Deep scan, which you run yourself, reviews your code for access-control, injection and secret problems. An outside scan reads the live site the way a visitor does: the JavaScript and headers actually served, HTTPS, robots.txt, sitemap and whether Google can read your pages. Use Lovable's scans before you publish and an outside check of the live URL after, especially if you use a custom domain or care about search traffic.",
  title="Lovable's security scan vs an outside scan: what each one checks",
@@ -178,6 +184,7 @@ GUIDES = {
 <p>Run Lovable's Quick scan and a Deep scan before you publish, and fix what they find. Then check the live URL from the outside, because that is what your users and Google actually receive. Repeat the outside check after big changes, since each new prompt can change what gets shipped. If your app moved off Lovable, or was built with Bolt, Replit, v0 or Cursor, the outside check works the same way. For Bolt's own built-in checks, see <a href=/guides/is-my-bolt-app-secure>Is my Bolt.new app secure?</a></p>
 <p>For the inside checks in more detail, see <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a> and the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>.</p>"""),
 "is-my-bolt-app-secure": dict(
+ cta_h="Check your Bolt app for these issues in about 30 seconds",
  q="How do I check if my Bolt.new app is secure?",
  answer="Run Bolt's own checks first: the Security Audit page in your database settings (all plans) flags missing Row Level Security and policies that are too open, and Run security audit in the Publish menu (paid plans) reviews your whole project. Then check the live site from the outside: search the JavaScript it serves for secret keys such as sk_live_ or service_role, open private pages while logged out, and confirm security headers, HTTPS, robots.txt and a sitemap are in place.",
  title="Is my Bolt.new app secure? A pre-launch checklist",
@@ -208,6 +215,7 @@ GUIDES = {
 <p class=prompt>Review this project for security before launch. Make sure Row Level Security is on for every table with separate select, insert, update and delete policies limited to the signed-in user. Move every secret key out of frontend code and out of any VITE_ variable into a server function that reads it from Secrets. Make every dashboard, admin and account page and every server function require a signed-in user, and check on the server that the user owns the record they ask for. List anything I need to change by hand.</p>
 <p>For the Supabase side in more detail, see the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>. Building with Replit instead? See <a href=/guides/is-my-replit-app-secure>Is my Replit app secure?</a></p>"""),
 "is-my-replit-app-secure": dict(
+ cta_h="Check your Replit app for these issues in about 30 seconds",
  q="How do I check if my Replit app is secure?",
  answer="Start with Replit's Security Center: the free Level 1 scan and automatic dependency scans check your packages for known vulnerabilities, and on paid plans the Level 2 deep scan reviews your code and Level 3 also tests the running Preview. Turn on Block publishing of critical vulnerabilities. Then check the published app from the outside: search the JavaScript it serves for secret keys, open private pages and API routes while logged out, and confirm HTTPS, security headers, robots.txt and a sitemap on your real domain.",
  title="Is my Replit app secure? What Replit's Security Center checks and what to test yourself",
@@ -242,7 +250,39 @@ GUIDES = {
 <tr><td>Google visibility</td><td>Not part of the scans</td><td>Yes: noindex, titles, robots.txt, sitemap, readable HTML</td></tr></table>
 <h2>A prompt you can give Replit Agent</h2>
 <p class=prompt>Review this app for security before I publish. Make sure every secret key is read from Secrets only in server code and never sent to the browser or stored in a VITE_ variable. Make every dashboard, admin and account page and every API route require a signed-in user, and check on the server that the user owns the record they ask for. Add security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy and a frame policy), hide stack traces in production errors, and add a robots.txt and sitemap.xml. List anything I need to change by hand.</p>
-<p>For similar checklists for other builders, see <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a> and <a href=/guides/is-my-bolt-app-secure>Is my Bolt.new app secure?</a></p>"""),
+<p>For similar checklists for other builders, see <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a>, <a href=/guides/is-my-bolt-app-secure>Is my Bolt.new app secure?</a> and <a href=/guides/is-my-v0-app-secure>Is my v0 app secure?</a></p>"""),
+"is-my-v0-app-secure": dict(
+ q="How do I check if my v0 app is secure?",
+ answer="v0 builds Next.js apps, so start with environment variables: anything named NEXT_PUBLIC_ is copied into the JavaScript every visitor downloads, so secret keys (Supabase service_role or sb_secret_, Stripe sk_live_, OpenAI or Anthropic keys) must never use that prefix and should be stored as Secret variables in Vercel. Then turn on Row Level Security for every Supabase table, make every route handler and server action check the signed-in user and record owner, open private pages while logged out, and confirm security headers, robots.txt and a sitemap on your live domain.",
+ title="Is my v0 app secure? A checklist for Next.js apps built with v0",
+ desc="How to check an app built with v0 by Vercel for exposed NEXT_PUBLIC_ keys, Supabase Row Level Security gaps, unprotected server actions and missing headers before launch.",
+ updated="2026-10-25",
+ cta_h="Check your v0 app for these issues in about 30 seconds",
+ body="""<p class=sub>v0 turns a prompt into a working Next.js app and deploys it to Vercel in one click. The code it writes is a good start, but who can see which data is still up to you. These are the checks worth doing before you share the link.</p>
+<h2>1. Check every NEXT_PUBLIC_ variable</h2>
+<p>In a Next.js app, any environment variable whose name starts with <code>NEXT_PUBLIC_</code> is written into the JavaScript sent to the browser when the app is built. Variables without the prefix stay on the server. <a href="https://v0.app/docs/security" rel=nofollow>v0's security docs</a> say it watches for risky <code>NEXT_PUBLIC_</code> use and warns you, but it is still worth looking yourself.</p>
+<p><b>How to check:</b> in Vercel, open your project, then Settings and Environment Variables, and read every name that starts with <code>NEXT_PUBLIC_</code>. The Supabase project URL, the Supabase anon or publishable key and a Stripe publishable key (<code>pk_live_</code>) are meant to be public. A Supabase <code>service_role</code> or <code>sb_secret_</code> key, a Stripe <code>sk_live_</code> key, or an OpenAI or Anthropic key is not. If one has the prefix, rotate it at the provider first, rename it without the prefix, read it only in server code, and redeploy, because existing deployments keep the old values.</p>
+<h2>2. Store secrets as Secret variables</h2>
+<p>Vercel lets you save a variable as a Secret, which cannot be read back in the dashboard after saving. Use that for passwords, API keys and tokens. If a key was saved as a readable value by mistake, delete it, add it again as a Secret and rotate the key. See <a href=/guides/hide-api-keys-in-ai-built-apps>how to hide API keys in a Lovable, Bolt, v0 or Cursor app</a>.</p>
+<h2>3. Turn on Row Level Security in Supabase</h2>
+<p>When a v0 app uses Supabase, client components often query the database straight from the browser with the public key. That is only safe when Row Level Security is on for every table and the policies limit each user to their own rows. Supabase's Security Advisor flags tables without it. The <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a> walks through the policies.</p>
+<h2>4. Protect route handlers and server actions</h2>
+<p>Route handlers and server actions run on the server, but anyone can call them directly, not just your buttons. Each one that reads or changes data should check who is signed in and that the record belongs to them. Hiding a button in a client component does not protect the action behind it.</p>
+<p><b>How to check:</b> open a private browser window and go straight to your dashboard, admin and account URLs, and to any URL with a record ID in it. Then sign in as a second account and try the first account's IDs. Data should not load in either case.</p>
+<h2>5. Check preview links, headers and HTTPS</h2>
+<p>Each change can create a new preview deployment with its own vercel.app link. In Vercel, Settings and Deployment Protection controls whether those links need a Vercel sign-in, so check it is on if previews use real data. On your production domain, confirm basic security headers such as Content-Security-Policy, X-Content-Type-Options, Referrer-Policy and a frame policy. Next.js does not add most of these unless you set them in <code>next.config</code> or middleware.</p>
+<h2>6. Make sure Google can find it</h2>
+<p>View the page source of your live site and search for "noindex", visit /robots.txt and /sitemap.xml on your real domain, and give each page its own title and description through Next.js metadata. Pages built only from client components can send little readable text before JavaScript runs. <a href=/guides/why-google-cant-find-your-ai-built-app>Why Google can't find your AI-built app</a> covers the fixes.</p>
+<h2>v0's built-in protection and an outside check, side by side</h2>
+<table class=cmp><tr><th></th><th>v0 and Vercel</th><th>Outside check of the live site</th></tr>
+<tr><td>Looks at</td><td>Your code while v0 writes it, and your Vercel settings</td><td>The published pages, scripts and headers</td></tr>
+<tr><td>Secret keys in NEXT_PUBLIC_ variables</td><td>v0 warns about risky use</td><td>Yes, searches the files visitors actually download</td></tr>
+<tr><td>Row Level Security and policies</td><td>No, set in Supabase</td><td>No, it cannot see database rules</td></tr>
+<tr><td>Security headers and HTTPS</td><td>HTTPS by default; headers are up to you</td><td>Yes</td></tr>
+<tr><td>Google visibility</td><td>Up to your metadata and sitemap</td><td>Yes: noindex, titles, robots.txt, sitemap, readable HTML</td></tr></table>
+<h2>A prompt you can give v0</h2>
+<p class=prompt>Review this app for security before launch. Make sure no secret key uses a NEXT_PUBLIC_ name and that secret keys are read only in server code that client components never import. Make every route handler and server action that reads or changes data check the signed-in user on the server and confirm they own the record. If the app uses Supabase, list every table and the Row Level Security policies it needs so users can only reach their own rows. Add security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy and a frame policy) in next.config, and add a robots.txt, a sitemap and a title and description for each page. List anything I need to change by hand in Vercel or Supabase.</p>
+<p>For similar checklists for other builders, see <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a>, <a href=/guides/is-my-bolt-app-secure>Is my Bolt.new app secure?</a> and <a href=/guides/is-my-replit-app-secure>Is my Replit app secure?</a></p>"""),
 }
 def head(slug, g):
     """Canonical, social preview tags and structured data so search engines and AI assistants can cite the guide."""
@@ -270,7 +310,7 @@ def render(slug):
     body = g['body']; i = body.find('</p>') + 4  # test 2026-10-21: scan box right after the intro, plus the one at the end
     short = f"<div class='card short'><b>Short answer</b><p style='margin:.4em 0 0'>{E(g['answer'])}</p></div>" if g.get("answer") else ""
     body = body[:i] + short + cta('guide-top') + body[i:]
-    return page(f"{g['title']} | {config.APP_NAME}", f"<small class=eyebrow>GUIDE</small><h1>{E(g['title'])}</h1>{body}{cta('guide-bottom')}", extra_head=head(slug, g), desc=g["desc"])
+    return page(f"{g['title']} | {config.APP_NAME}", f"<small class=eyebrow>GUIDE</small><h1>{E(g['title'])}</h1>{body}{cta('guide-bottom', g.get('cta_h') or 'Check your app in about 30 seconds')}", extra_head=head(slug, g), desc=g["desc"])
 
 def index():
     items = "".join(f"<div class=card><h2 style='margin-top:0'><a href=/guides/{s}>{E(g['title'])}</a></h2><p>{E(g['desc'])}</p></div>" for s, g in GUIDES.items())
