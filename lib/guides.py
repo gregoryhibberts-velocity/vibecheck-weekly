@@ -28,7 +28,8 @@ GUIDES = {
 <h2>5. Re-check after every big change</h2>
 <p>Each new prompt can change your code. A setting that was fine last week can change after a refactor, so a regular re-check matters more than a single audit.</p>
 <h2>What an outside scan can and cannot tell you</h2>
-<p>A scan of your live site can find keys in public code, missing headers and visibility problems. It cannot see your database rules directly, so RLS should also be reviewed inside Supabase. For how this compares with Lovable's own Quick and Deep scans, see <a href=/guides/lovable-security-scan-vs-outside-scan>Lovable's security scan vs an outside scan</a>.</p>"""),
+<p>A scan of your live site can find keys in public code, missing headers and visibility problems. It cannot see your database rules directly, so RLS should also be reviewed inside Supabase. For how this compares with Lovable's own Quick and Deep scans, see <a href=/guides/lovable-security-scan-vs-outside-scan>Lovable's security scan vs an outside scan</a>.</p>
+<p>For similar checklists for other builders, see <a href=/guides/is-my-bolt-app-secure>Is my Bolt.new app secure?</a> and <a href=/guides/is-my-replit-app-secure>Is my Replit app secure?</a></p>"""),
 "supabase-rls-checklist": dict(
  q="How do I set up Supabase Row Level Security correctly?",
  answer="Turn on Row Level Security for every table in the public schema, give each table separate select, insert, update and delete policies that compare the owner column with auth.uid(), use WITH CHECK on insert and update, keep the service_role key off the browser, and test by trying to read one account's data while signed in as a second account.",
@@ -51,7 +52,8 @@ GUIDES = {
 <h2>A prompt you can give your AI builder</h2>
 <p class=prompt>Review every table in my Supabase public schema. Enable Row Level Security on any table where it is off. For each table, add separate select, insert, update and delete policies so users can only access rows where user_id = auth.uid(), and use WITH CHECK on insert and update. List any table you think should stay public and explain why before changing it.</p>
 <h2>Where a live scan helps</h2>
-<p>A scan of your live site cannot read your RLS policies, but it can confirm your app uses Supabase, check that no service_role key is exposed, and flag the other issues that tend to appear alongside RLS gaps.</p>"""),
+<p>A scan of your live site cannot read your RLS policies, but it can confirm your app uses Supabase, check that no service_role key is exposed, and flag the other issues that tend to appear alongside RLS gaps.</p>
+<p>Related: <a href=/guides/api-key-exposed-in-frontend>how to check if an API key is exposed in your frontend</a>, and the full <a href=/guides/is-my-lovable-app-secure>Lovable security checklist</a>.</p>"""),
 "why-google-cant-find-your-ai-built-app": dict(
  q="Why can't Google find my AI-built app?",
  answer="The usual causes are a leftover noindex tag, a robots.txt that blocks crawlers, no sitemap, the same title and description on every page, and pages that are empty until JavaScript runs. Fix those, then add the site to Google Search Console, submit the sitemap and request indexing for the home page.",
@@ -71,7 +73,8 @@ GUIDES = {
 <h2>6. No social preview tags</h2>
 <p>Open Graph tags (og:title, og:description, og:image) control how your link looks when shared. They don't directly affect ranking, but a clear preview helps people click, and shared links help a new site get found.</p>
 <h2>7. The site is too new or has no links</h2>
-<p>Even a well-built site takes time to be crawled. Register it in Google Search Console, submit the sitemap and request indexing for the home page.</p>"""),
+<p>Even a well-built site takes time to be crawled. Register it in Google Search Console, submit the sitemap and request indexing for the home page.</p>
+<p>Security matters too before you share your link. See <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a> or <a href=/guides/is-my-bolt-app-secure>Is my Bolt.new app secure?</a></p>"""),
 "api-key-exposed-in-frontend": dict(
  q="How do I check if my API key is exposed in my app's frontend?",
  answer="Open your live site, open the browser developer tools and search the loaded scripts for sk_live_, sk-, sk-ant- and service_role. Any secret key you find there, or stored in a variable starting with VITE_, NEXT_PUBLIC_ or REACT_APP_, is public. Rotate it at the provider first, then move the call that uses it into a server-side function.",
@@ -256,7 +259,7 @@ def head(slug, g):
         {"@type": "ListItem", "position": 3, "name": g["title"], "item": url}]}
     out = (f"<link rel=canonical href='{url}'><meta property='og:type' content='article'><meta property='og:url' content='{url}'>"
            f"<meta property='og:title' content='{E(g['title'])}'><meta property='og:description' content='{E(g['desc'])}'>"
-           f"<meta name='twitter:card' content='summary'><meta name='twitter:site' content='@VibeCheck_Wkly'>" + ld(art) + ld(crumbs))
+           + ld(art) + ld(crumbs))
     if g.get("answer"):
         out += ld({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": g.get("q") or g["title"],
                    "acceptedAnswer": {"@type": "Answer", "text": g["answer"]}}]})
