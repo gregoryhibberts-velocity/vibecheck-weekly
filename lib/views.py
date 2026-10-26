@@ -61,7 +61,7 @@ LANDING_DESC = "Free 30-second check for apps built with Lovable, Bolt, Replit, 
 def landing():
     return page(f"{config.APP_NAME} – Is your AI-built app leaking keys?", """
 <section class=hero><small class=eyebrow>FREE 30-SECOND CHECK</small>
-<h1>Your AI-built app works. But is it leaking keys, or invisible to Google?</h1>
+<h1>Is your Lovable, Bolt or Cursor app leaking keys, or invisible to Google?</h1><!-- test 2026-10-26 hero-headline-names-builders -->
 <p class=sub>Paste your app's URL. We read only what any visitor's browser can see and tell you, in plain English, what's exposed and what's hurting your search ranking, with fix prompts you can paste straight back into your AI tool.</p>
 <form id=check class="card cta" method=post action=/scan>
 <input type=text inputmode=url autocapitalize=off autocorrect=off spellcheck=false name=url required placeholder="myapp.lovable.app or yourdomain.com" aria-label="Your app URL">
