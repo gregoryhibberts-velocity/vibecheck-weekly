@@ -71,5 +71,18 @@
       "A quick check: create two accounts. Signed in as the first, open a page that shows its own data and copy the address. Then sign in as the second account in a private window and open that same address. You should get an error or a not-found page, not the first account's data.",
       "To fix it, have the server confirm that each record belongs to the signed-in user before returning it, on every page and API route. Hiding a link in the interface is not protection."
     ]
+  },
+  {
+    "slug": "what-the-full-report-and-weekly-plans-include",
+    "date": "2026-10-26",
+    "status": "published",
+    "subject": "What do you get after the free scan?",
+    "title": "What the $9 full report and the weekly monitoring plans include",
+    "body": [
+      "If you ran a free VibeCheck scan, you saw your score and the list of issues it found, with the details and fixes locked. Here is what each paid option adds.",
+      "The full report is $9, one time, for one scan. It shows the details behind each issue and a copy-paste fix prompt you can hand to your AI tool. There is no subscription.",
+      "Weekly monitoring re-checks your app every week and emails you only what changed, such as a new issue after an update. Solo is $19 a month for one app, and Pro is $49 a month for up to five apps. Both include full reports, and you can cancel any time. To start, you add a small verification tag so only the owner can turn it on."
+    ],
+    "cta": "Run a free scan, then unlock the full report from your results"
   }
 ]
