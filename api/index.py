@@ -139,7 +139,7 @@ class handler(BaseHTTPRequestHandler):
             sc = db.one("SELECT * FROM scans WHERE token=?", (m.group(1),))
             if not sc: return self._send(404, views.message("Not found", "Report not found. Free reports are kept temporarily during our beta."))
             return self._send(200, views.report(sc, scan_mode(sc)))
-        self._send(404, views.message("Not found", "Page not found."))
+        self._send(404, guides.not_found())
 
     def _render_site(self, s, err=None, code=200):
         acc = db.one("SELECT * FROM accounts WHERE id=?", (s["account_id"],))

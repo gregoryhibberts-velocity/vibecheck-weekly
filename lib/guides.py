@@ -213,7 +213,7 @@ GUIDES = {
 <tr><td>Cost</td><td>Database check on all plans; project audit on paid plans</td><td>Free first check</td></tr></table>
 <h2>A prompt you can give Bolt</h2>
 <p class=prompt>Review this project for security before launch. Make sure Row Level Security is on for every table with separate select, insert, update and delete policies limited to the signed-in user. Move every secret key out of frontend code and out of any VITE_ variable into a server function that reads it from Secrets. Make every dashboard, admin and account page and every server function require a signed-in user, and check on the server that the user owns the record they ask for. List anything I need to change by hand.</p>
-<p>For the Supabase side in more detail, see the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>. Building with Replit instead? See <a href=/guides/is-my-replit-app-secure>Is my Replit app secure?</a></p>"""),
+<p>For the Supabase side in more detail, see the <a href=/guides/supabase-rls-checklist>Supabase RLS checklist</a>. For similar checklists for other builders, see <a href=/guides/is-my-lovable-app-secure>Is my Lovable app secure?</a>, <a href=/guides/is-my-replit-app-secure>Is my Replit app secure?</a> and <a href=/guides/is-my-v0-app-secure>Is my v0 app secure?</a></p>"""),
 "is-my-replit-app-secure": dict(
  cta_h="Check your Replit app for these issues in about 30 seconds",
  q="How do I check if my Replit app is secure?",
@@ -330,3 +330,12 @@ def llms_txt():
      "## Guides"] + [f"- [{g['title']}]({b}/guides/{s}): {g.get('answer') or g['desc']}" for s, g in GUIDES.items()] + ["",
      "## FAQ"] + [f"- {q} {a}" for q, a in views.FAQ_LD] + ["", "## Optional", f"- [Daily tips]({b}/tips): short security and Google-visibility tips", f"- [Tips RSS]({b}/tips/rss.xml)", ""]
     return "\n".join(lines)
+
+
+def not_found():
+    """Friendly 404 page. Test 2026-10-25 not-found-scan-box: offer the free check and the main guides instead of a dead end."""
+    links = "".join(f"<li><a href=/guides/{k}>{E(GUIDES[k]['title'])}</a></li>" for k in ("is-my-lovable-app-secure", "is-my-bolt-app-secure", "is-my-replit-app-secure", "is-my-v0-app-secure", "why-google-cant-find-your-ai-built-app") if k in GUIDES)
+    body = (f"<h1>We can't find that page</h1><p class=sub>The link may be old or typed wrong. You can go <a href=/>back to the home page</a>, read a guide, or run the free check below.</p>"
+            f"<div class=card><h2 style=\"margin-top:0\">Popular guides</h2><ul style=\"line-height:1.6;padding-left:20px\">{links}</ul><p><a href=/guides>See all guides</a></p></div>"
+            f"{cta('404', 'Check your app in about 30 seconds')}")
+    return page(f"Page not found | {config.APP_NAME}", body, extra_head="<meta name=robots content=noindex>")
